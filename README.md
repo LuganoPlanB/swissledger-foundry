@@ -13,11 +13,17 @@ Fork of [Foundry](https://github.com/foundry-rs/foundry) **1.7.1** adapted for t
 ## Build
 
 ```sh
-make build
+make build      # debug build
+make install    # install to $(DESTDIR)$(PREFIX)/bin (default /usr/local)
+make build-static  # fully static, release-optimized (musl)
 ```
 
-Binaries are placed in `target/debug/` as `swissledger-forge`, `swissledger-cast`,
-`swissledger-anvil`, `swissledger-chisel`.
+Binaries are placed in `target/debug/` (or `target/x86_64-unknown-linux-musl/dist/` for static) as
+`swissledger-forge`, `swissledger-cast`, `swissledger-anvil`, `swissledger-chisel`.
+
+For `build-static`, hardware wallet support (`--ledger`, `--trezor`) is excluded.
+Prerequisites: `rustup target add x86_64-unknown-linux-musl`, `apt-get install musl-tools`,
+and kernel headers symlink into the musl include path.
 
 ## Changes from upstream
 

@@ -38,12 +38,12 @@ build: ## Build the project.
 	cargo build --locked --features "$(FEATURES)" --profile "$(PROFILE)"
 
 .PHONY: build-static
-build-static: ## Build fully static binaries (musl, no dynamic linkage).
+build-static: ## Build fully static, release-optimized binaries (musl).
 # Prerequisites:
 #   rustup target add x86_64-unknown-linux-musl
 #   sudo apt-get install musl-tools
-#   for dir in asm-generic drm linux mtd rdma sound video xen; do \
-#     sudo ln -s /usr/include/$$dir /usr/include/x86_64-linux-musl/$$dir; done
+#   sudo ln -s /usr/include/linux /usr/include/x86_64-linux-musl/linux
+#	Hardware wallet support (--ledger, --trezor) is excluded from static builds.
 	PKG_CONFIG_ALLOW_CROSS=1 \
 	CC_x86_64_unknown_linux_musl=musl-gcc \
 	cargo build \
