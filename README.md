@@ -3,6 +3,9 @@
 Fork of [Foundry](https://github.com/foundry-rs/foundry) **1.7.1** adapted for the
 [SwissLedger](https://ledger.swiss) blockchain (chain id 110).
 
+<div align="center">
+  <img src=".github/assets/banner.png" alt="Foundry banner" />
+
 ## Tools
 
 - **swissledger-forge** — Build, test, fuzz, debug and deploy Solidity contracts.
@@ -14,16 +17,9 @@ Fork of [Foundry](https://github.com/foundry-rs/foundry) **1.7.1** adapted for t
 
 ```sh
 make build      # debug build
-make install    # install to $(DESTDIR)$(PREFIX)/bin (default /usr/local)
-make build-static  # fully static, release-optimized (musl)
+make install    # install to /usr/local/bin
+make build-static  # static release (musl)
 ```
-
-Binaries are placed in `target/debug/` (or `target/x86_64-unknown-linux-musl/dist/` for static) as
-`swissledger-forge`, `swissledger-cast`, `swissledger-anvil`, `swissledger-chisel`.
-
-For `build-static`, hardware wallet support (`--ledger`, `--trezor`) is excluded.
-Prerequisites: `rustup target add x86_64-unknown-linux-musl`, `apt-get install musl-tools`,
-and kernel headers symlink into the musl include path.
 
 ## Changes from upstream
 
@@ -37,8 +33,6 @@ and kernel headers symlink into the musl include path.
 | 6 | `cast` gas limit | When `eth_estimateGas` fails, falls back to a default gas limit (20M) or the user-provided `--gas-limit` instead of aborting. |
 | 7 | Binaries | Renamed with `swissledger-` prefix: `swissledger-cast`, `swissledger-forge`, `swissledger-anvil`, `swissledger-chisel`. |
 | 8 | Test suite | Vyper-dependent and flaky tests excluded from the default profile. Run `make test` for a clean pass. |
-
-Full rationale and reproduction steps for each fix: [`FORK.md`](./FORK.md).
 
 ## License
 
