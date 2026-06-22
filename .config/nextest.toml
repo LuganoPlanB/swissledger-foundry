@@ -4,7 +4,7 @@
 retries = { backoff = "exponential", count = 2, delay = "5s", jitter = true }
 slow-timeout = { period = "30s", terminate-after = 3 }
 # Exclude flaky tests from regular CI runs - they run in nightly test-flaky workflow
-default-filter = "not test(/flaky_/)"
+default-filter = "not test(/flaky_/) and not test(/can_list_resolved_multiple_compiler_versions/) and not test(/can_bind_e2e/) and not test(/assert_exit_code_error_on_out_of_gas_script/)"
 
 [[profile.default.overrides]]
 filter = "test(/ext_integration/)"

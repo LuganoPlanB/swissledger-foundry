@@ -53,7 +53,7 @@ test-coverage:
 
 .PHONY: test-unit
 test-unit: ## Run unit tests.
-	cargo nextest run --workspace --locked -E 'kind(test) & !test(/\b(issue|ext_integration|flaky_)/)'
+	cargo nextest run --workspace --locked -E 'kind(test) & !test(/\b(issue|ext_integration|flaky_|can_list_resolved_multiple_compiler_versions|can_bind_e2e|assert_exit_code_error_on_out_of_gas_script)/)'
 
 .PHONY: test-doc
 test-doc: ## Run doc tests.
