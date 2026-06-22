@@ -11,6 +11,11 @@ DOCKER_IMAGE_NAME ?= ghcr.io/foundry-rs/foundry:latest
 
 BIN_DIR = dist/bin
 CARGO_TARGET_DIR ?= target
+PREFIX ?= /usr/local
+DESTDIR ?=
+
+# Cargo maps `dev` profile to `target/debug` and `release` to `target/release`.
+_BIN_SRC_DIR = $(CARGO_TARGET_DIR)/$(if $(filter dev,$(PROFILE)),debug,$(if $(filter release,$(PROFILE)),release,$(PROFILE)))
 
 # List of features to use when building. Can be overridden via the environment.
 # No jemalloc on Windows
@@ -123,6 +128,14 @@ doc: ## Build the documentation.
 .PHONY: lock
 lock: ## Update the Cargo.lock file with the current dependencies.
 	cargo fetch
+
+.PHONY: install
+install: ## Install binaries to $(DESTDIR)$(PREFIX)/bin.
+	install -d "$(DESTDIR)$(PREFIX)/bin"
+	install -m 755 "$(_BIN_SRC_DIR)/swissledger-forge" "$(DESTDIR)$(PREFIX)/bin/"
+	install -m 755 "$(_BIN_SRC_DIR)/swissledger-cast" "$(DESTDIR)$(PREFIX)/bin/"
+	install -m 755 "$(_BIN_SRC_DIR)/swissledger-anvil" "$(DESTDIR)$(PREFIX)/bin/"
+	install -m 755 "$(_BIN_SRC_DIR)/swissledger-chisel" "$(DESTDIR)$(PREFIX)/bin/"
 
 .PHONY: clean
 clean: ## Clean the project.
