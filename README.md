@@ -37,6 +37,7 @@ Full rationale and reproduction steps for each fix: [`FORK.md`](./FORK.md).
 ## License
 
 Copyright (c) 2026 Plan B Foundation
+
 Copyright (c) 2021 Georgios Konstantopoulos
 
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or
