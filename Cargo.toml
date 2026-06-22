@@ -414,7 +414,7 @@ alloy-evm = "0.33.2"
 alloy-op-evm = "0.31.0"
 
 # revm
-revm = { version = "38.0.0", default-features = false }
+revm = { version = "41.0.0", default-features = false }
 revm-inspectors = { version = "0.39.0", features = ["serde"] }
 op-revm = { version = "19.0.0", default-features = false }
 
