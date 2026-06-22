@@ -660,7 +660,13 @@ where
     /// Only fills values that haven't been explicitly set by the user.
     async fn fill_fees(&mut self) -> Result<()> {
         if self.legacy && self.tx.gas_price().is_none() {
-            self.tx.set_gas_price(self.provider.get_gas_price().await?);
+            match self.provider.get_gas_price().await {
+                Ok(price) => self.tx.set_gas_price(price),
+                Err(err) => {
+                    sh_warn!("Failed to fetch gas price, defaulting to 0: {err}")?;
+                    self.tx.set_gas_price(0);
+                }
+            }
         }
 
         if self.blob && self.tx.max_fee_per_blob_gas().is_none() {
@@ -689,7 +695,9 @@ where
     }
 
     /// Estimate tx gas from provider call. Tries to decode custom error if execution reverted.
+    /// Falls back to a default gas limit on chains where `eth_estimateGas` is unavailable.
     async fn estimate_gas(&mut self) -> Result<()> {
+        const DEFAULT_GAS_LIMIT: u64 = 20_000_000;
         match self.provider.estimate_gas(self.tx.clone()).await {
             Ok(estimated) => {
                 self.tx.set_gas_limit(estimated);
@@ -697,8 +705,6 @@ where
             }
             Err(err) => {
                 if let TransportError::ErrorResp(payload) = &err {
-                    // If execution reverted with code 3 during provider gas estimation then try
-                    // to decode custom errors and append it to the error message.
                     if payload.code == 3
                         && let Some(data) = &payload.data
                         && let Ok(Some(decoded_error)) = decode_execution_revert(data).await
@@ -706,7 +712,13 @@ where
                         eyre::bail!("Failed to estimate gas: {}: {}", err, decoded_error)
                     }
                 }
-                eyre::bail!("Failed to estimate gas: {}", err)
+                if self.tx.gas_limit().is_none() {
+                    sh_warn!("Failed to estimate gas, falling back to {DEFAULT_GAS_LIMIT}: {err}")?;
+                    self.tx.set_gas_limit(DEFAULT_GAS_LIMIT);
+                    Ok(())
+                } else {
+                    eyre::bail!("Failed to estimate gas: {}", err)
+                }
             }
         }
     }
