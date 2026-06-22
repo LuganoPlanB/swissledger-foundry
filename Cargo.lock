@@ -82,23 +82,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d1172e33a862030da77768c11cf17a1f801590de94cf518392b65207f15810c8"
 dependencies = [
  "alloy-consensus",
- "alloy-contract",
  "alloy-core",
- "alloy-eips 2.1.0",
- "alloy-genesis",
- "alloy-network",
- "alloy-provider",
- "alloy-pubsub",
- "alloy-rpc-client",
- "alloy-rpc-types",
- "alloy-serde 2.1.0",
- "alloy-signer",
- "alloy-signer-local",
- "alloy-transport",
- "alloy-transport-http",
- "alloy-transport-ipc",
- "alloy-transport-ws",
- "alloy-trie",
 ]
 
 [[package]]
@@ -185,8 +169,6 @@ version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62ddde5968de6044d67af107ad835bc0069a7ca245870b94c5958a7d8712b184"
 dependencies = [
- "alloy-dyn-abi",
- "alloy-json-abi",
  "alloy-primitives",
  "alloy-rlp",
  "alloy-sol-types",
@@ -259,7 +241,6 @@ dependencies = [
  "borsh",
  "k256",
  "serde",
- "serde_with",
  "thiserror 2.0.18",
 ]
 
@@ -543,7 +524,6 @@ dependencies = [
  "alloy-primitives",
  "alloy-pubsub",
  "alloy-rpc-client",
- "alloy-rpc-types-anvil",
  "alloy-rpc-types-debug",
  "alloy-rpc-types-eth",
  "alloy-rpc-types-trace",
@@ -652,7 +632,6 @@ checksum = "2a05ef5b11fad72068e6f011c21445bc5b596ac850644c4a14c30d845ce56de8"
 dependencies = [
  "alloy-primitives",
  "alloy-rpc-types-anvil",
- "alloy-rpc-types-debug",
  "alloy-rpc-types-engine",
  "alloy-rpc-types-eth",
  "alloy-rpc-types-trace",
@@ -1273,7 +1252,6 @@ dependencies = [
  "clap",
  "clap_complete",
  "ctrlc",
- "ethereum_ssz",
  "eyre",
  "fdlimit",
  "flate2",
@@ -5147,7 +5125,6 @@ dependencies = [
  "futures",
  "itertools 0.14.0",
  "jiff",
- "mpp",
  "num-format",
  "op-alloy-network",
  "op-alloy-rpc-types",
@@ -7393,16 +7370,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "metrics"
-version = "0.24.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89550ee9f79e88fef3119de263694973a8adb26c21d75322164fb8c493039fe2"
-dependencies = [
- "portable-atomic",
- "rapidhash",
-]
-
-[[package]]
 name = "miette"
 version = "7.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7528,34 +7495,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.118",
-]
-
-[[package]]
-name = "mpp"
-version = "0.10.0"
-source = "git+https://github.com/tempoxyz/mpp-rs?rev=554d20112eb014bd223d54de7f152ca59b2aa4fd#554d20112eb014bd223d54de7f152ca59b2aa4fd"
-dependencies = [
- "alloy",
- "async-stream",
- "base64 0.22.1",
- "futures-core",
- "futures-util",
- "hex",
- "hmac",
- "http 1.4.2",
- "rand 0.9.4",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "serde_json_canonicalizer",
- "sha2 0.10.9",
- "tempo-alloy",
- "tempo-primitives",
- "thiserror 2.0.18",
- "time",
- "tokio",
- "tokio-tungstenite 0.26.2",
- "uuid 1.23.3",
 ]
 
 [[package]]
@@ -9326,30 +9265,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "reth-db-api"
-version = "2.1.0"
-source = "git+https://github.com/paradigmxyz/reth?rev=7839f3d#7839f3d876b32842b059ca8171242b807ba1fc80"
-dependencies = [
- "alloy-consensus",
- "alloy-primitives",
- "arrayvec",
- "bytes",
- "derive_more",
- "metrics",
- "modular-bitfield",
- "reth-codecs",
- "reth-db-models",
- "reth-ethereum-primitives",
- "reth-primitives-traits",
- "reth-prune-types",
- "reth-stages-types",
- "reth-storage-errors",
- "reth-trie-common",
- "roaring",
- "serde",
-]
-
-[[package]]
 name = "reth-db-models"
 version = "2.1.0"
 source = "git+https://github.com/paradigmxyz/reth?rev=7839f3d#7839f3d876b32842b059ca8171242b807ba1fc80"
@@ -9357,7 +9272,6 @@ dependencies = [
  "alloy-eips 2.1.0",
  "alloy-primitives",
  "bytes",
- "modular-bitfield",
  "reth-codecs",
  "reth-primitives-traits",
  "serde",
@@ -9505,11 +9419,9 @@ dependencies = [
  "alloy-rlp",
  "alloy-rpc-types-eth",
  "alloy-trie",
- "byteorder",
  "bytes",
  "dashmap",
  "derive_more",
- "modular-bitfield",
  "once_cell",
  "quanta",
  "reth-codecs",
@@ -9528,7 +9440,6 @@ source = "git+https://github.com/paradigmxyz/reth?rev=7839f3d#7839f3d876b32842b0
 dependencies = [
  "alloy-primitives",
  "derive_more",
- "modular-bitfield",
  "reth-codecs",
  "serde",
  "strum 0.27.2",
@@ -9591,7 +9502,6 @@ source = "git+https://github.com/paradigmxyz/reth?rev=7839f3d#7839f3d876b32842b0
 dependencies = [
  "alloy-primitives",
  "bytes",
- "modular-bitfield",
  "reth-codecs",
  "reth-trie-common",
  "serde",
@@ -9957,16 +9867,6 @@ checksum = "bb919243f34364b6bd2fc10ef797edbfa75f33c252e7998527479c6d6b47e1ec"
 dependencies = [
  "bytes",
  "rustc-hex",
-]
-
-[[package]]
-name = "roaring"
-version = "0.11.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1dedc5658c6ecb3bdb5ef5f3295bb9253f42dcf3fd1402c03f6b1f7659c3c4a9"
-dependencies = [
- "bytemuck",
- "byteorder",
 ]
 
 [[package]]
@@ -10534,17 +10434,6 @@ dependencies = [
  "serde",
  "serde_core",
  "zmij",
-]
-
-[[package]]
-name = "serde_json_canonicalizer"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe52319a927259afbfa5180c5157cd8167edfd3e8c254f9558c7fef44c5649f2"
-dependencies = [
- "ryu-js",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -11609,11 +11498,9 @@ dependencies = [
  "base64 0.22.1",
  "derive_more",
  "ed25519-consensus",
- "modular-bitfield",
  "once_cell",
  "p256",
  "reth-codecs",
- "reth-db-api",
  "reth-ethereum-primitives",
  "reth-primitives-traits",
  "reth-rpc-convert",
@@ -11895,18 +11782,6 @@ dependencies = [
  "pin-project-lite",
  "tokio",
  "tokio-util",
-]
-
-[[package]]
-name = "tokio-tungstenite"
-version = "0.26.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a9daff607c6d2bf6c16fd681ccb7eecc83e4e2cdc1ca067ffaadfca5de7f084"
-dependencies = [
- "futures-util",
- "log",
- "tokio",
- "tungstenite 0.26.2",
 ]
 
 [[package]]
@@ -12296,23 +12171,6 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
-
-[[package]]
-name = "tungstenite"
-version = "0.26.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4793cb5e56680ecbb1d843515b23b6de9a75eb04b66643e256a396d43be33c13"
-dependencies = [
- "bytes",
- "data-encoding",
- "http 1.4.2",
- "httparse",
- "log",
- "rand 0.9.4",
- "sha1",
- "thiserror 2.0.18",
- "utf-8",
-]
 
 [[package]]
 name = "tungstenite"

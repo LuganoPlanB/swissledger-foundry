@@ -7,11 +7,9 @@ rust-version = "1.93"
 description = "Wallet integrations for Foundry (SwissLedger fork)"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/LuganoPlanB/swissledger-foundry"
-
 [lib]
 name = "foundry_wallets"
 path = "src/lib.rs"
-
 [features]
 default = []
 aws-kms = ["dep:alloy-signer-aws", "dep:aws-config"]
@@ -20,7 +18,6 @@ ledger = ["dep:alloy-signer-ledger"]
 tempo = ["dep:tempo-primitives", "dep:alloy-rlp", "dep:toml"]
 trezor = ["dep:alloy-signer-trezor"]
 turnkey = ["dep:alloy-signer-turnkey"]
-
 [dependencies]
 alloy-consensus = { version = "2.0.0", default-features = false }
 alloy-dyn-abi = "1.5.2"
@@ -46,7 +43,6 @@ rpassword = "7"
 serde = { version = "1.0", features = ["derive", "rc"] }
 tempo-primitives = { version = "1.6", features = ["std", "serde"], optional = true, default-features = false }
 thiserror = "2"
-serde_json = "1.0"
 toml = { version = "0.9", optional = true }
 tracing = "0.1"
 

@@ -56,8 +56,8 @@ alloy-sol-types.workspace = true
 alloy-transport.workspace = true
 alloy-ens = { workspace = true, features = ["provider"] }
 alloy-eips.workspace = true
-tempo-alloy.workspace = true
-tempo-contracts = { workspace = true, optional = true }
+tempo-alloy = { workspace = true, optional = true }
+tempo-contracts.workspace = true
 tempo-primitives.workspace = true
 alloy-evm.workspace = true
 
@@ -109,5 +109,3 @@ aws-kms = ["foundry-wallets/aws-kms"]
 gcp-kms = ["foundry-wallets/gcp-kms"]
 turnkey = ["foundry-wallets/turnkey"]
 isolate-by-default = ["foundry-config/isolate-by-default"]
-tempo-contracts = ["dep:tempo-contracts"]
-debugger = ["dep:foundry-debugger"]
