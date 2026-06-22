@@ -9,7 +9,7 @@ use crate::{
     provider::{curl_transport::CurlTransport, runtime_transport::RuntimeTransportBuilder},
 };
 use alloy_chains::NamedChain;
-use alloy_json_rpc::{RequestPacket, ResponsePacket};
+use alloy_json_rpc::{RequestPacket, ResponsePacket, SerializedRequest};
 use alloy_network::{Network, NetworkWallet};
 use alloy_provider::{
     Identity, ProviderBuilder as AlloyProviderBuilder, RootProvider,
@@ -35,7 +35,7 @@ use std::{
     task::{Context, Poll},
     time::Duration,
 };
-use tower::Service;
+use tower::{Layer, Service};
 use url::ParseError;
 
 /// The assumed block time for unknown chains.
@@ -82,6 +82,68 @@ pub fn get_http_provider(builder: impl AsRef<str>) -> RetryProvider {
 #[inline]
 pub fn try_get_http_provider(builder: impl AsRef<str>) -> Result<RetryProvider> {
     ProviderBuilder::new(builder.as_ref()).build()
+}
+
+fn fix_serialized(ser: SerializedRequest) -> SerializedRequest {
+    if ser.serialized().get().contains("\"params\"") {
+        return ser;
+    }
+    let (meta, _) = ser.decompose();
+    alloy_json_rpc::Request::new(meta.method, meta.id, serde_json::Value::Array(vec![]))
+        .try_into()
+        .unwrap_or_else(|_| unreachable!())
+}
+
+fn fix_request_packet(req: RequestPacket) -> RequestPacket {
+    match req {
+        RequestPacket::Single(ser) => RequestPacket::Single(fix_serialized(ser)),
+        RequestPacket::Batch(batch) => {
+            RequestPacket::Batch(batch.into_iter().map(fix_serialized).collect())
+        }
+    }
+}
+
+#[derive(Clone, Default)]
+pub struct ParamsLayer;
+
+impl<S> Layer<S> for ParamsLayer {
+    type Service = ParamsService<S>;
+
+    fn layer(&self, inner: S) -> Self::Service {
+        ParamsService { inner }
+    }
+}
+
+#[derive(Clone)]
+pub struct ParamsService<S> {
+    inner: S,
+}
+
+impl<S> Service<RequestPacket> for ParamsService<S>
+where
+    S: Service<
+            RequestPacket,
+            Response = ResponsePacket,
+            Error = TransportError,
+            Future = TransportFut<'static>,
+        > + Clone
+        + Send
+        + Sync
+        + 'static,
+{
+    type Response = ResponsePacket;
+    type Error = TransportError;
+    type Future = TransportFut<'static>;
+
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+
+    fn call(&mut self, req: RequestPacket) -> Self::Future {
+        let req = fix_request_packet(req);
+        let mut inner = self.inner.clone();
+        inner.call(req)
+    }
 }
 
 /// A round-robin transport that distributes requests across multiple transports.
@@ -157,6 +219,8 @@ pub struct ProviderBuilder<N: Network = AnyNetwork> {
     no_proxy: bool,
     /// Whether to output curl commands instead of making requests.
     curl_mode: bool,
+    /// Whether to always include `"params"` in JSON-RPC requests.
+    require_params: bool,
     /// Phantom data for the network type.
     _network: PhantomData<N>,
 }
@@ -211,6 +275,7 @@ impl<N: Network> ProviderBuilder<N> {
             accept_invalid_certs: false,
             no_proxy: false,
             curl_mode: false,
+            require_params: false,
             _network: PhantomData,
         }
     }
@@ -224,6 +289,10 @@ impl<N: Network> ProviderBuilder<N> {
 
         builder = builder.accept_invalid_certs(config.eth_rpc_accept_invalid_certs);
         builder = builder.curl_mode(config.eth_rpc_curl);
+        builder = builder.require_params(
+            config.eth_rpc_require_params
+                || std::env::var("ETH_RPC_REQUIRE_PARAMS").is_ok_and(|v| v == "true"),
+        );
 
         if let Ok(chain) = config.chain.unwrap_or_default().try_into() {
             builder = builder.chain(chain);
@@ -365,6 +434,12 @@ impl<N: Network> ProviderBuilder<N> {
         self
     }
 
+    /// Sets whether to always include `"params"` in JSON-RPC requests.
+    pub const fn require_params(mut self, require_params: bool) -> Self {
+        self.require_params = require_params;
+        self
+    }
+
     /// Constructs the `RetryProvider` taking all configs into account.
     pub fn build(self) -> Result<RetryProvider<N>> {
         let Self {
@@ -380,6 +455,7 @@ impl<N: Network> ProviderBuilder<N> {
             accept_invalid_certs,
             no_proxy,
             curl_mode,
+            require_params,
             ..
         } = self;
         let url = url?;
@@ -390,7 +466,11 @@ impl<N: Network> ProviderBuilder<N> {
         // If curl_mode is enabled, use CurlTransport instead of RuntimeTransport
         if curl_mode {
             let transport = CurlTransport::new(url).with_headers(headers).with_jwt(jwt);
-            let client = ClientBuilder::default().layer(retry_layer).transport(transport, is_local);
+            let client = if require_params {
+                ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+            } else {
+                ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+            };
 
             let provider = AlloyProviderBuilder::<_, _, N>::default()
                 .connect_provider(RootProvider::new(client));
@@ -405,7 +485,11 @@ impl<N: Network> ProviderBuilder<N> {
             .accept_invalid_certs(accept_invalid_certs)
             .no_proxy(no_proxy)
             .build();
-        let client = ClientBuilder::default().layer(retry_layer).transport(transport, is_local);
+        let client = if require_params {
+            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+        } else {
+            ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+        };
 
         if !is_local {
             client.set_poll_interval(
@@ -445,6 +529,7 @@ impl<N: Network> ProviderBuilder<N> {
             accept_invalid_certs,
             no_proxy,
             curl_mode,
+            require_params,
             ..
         } = self;
 
@@ -476,7 +561,11 @@ impl<N: Network> ProviderBuilder<N> {
             RetryBackoffLayer::new(max_retry, initial_backoff, compute_units_per_second);
         // Use normalized/parsed URLs for local detection, consistent with build()
         let is_local = parsed_urls.iter().all(|url| guess_local_url(url.as_str()));
-        let client = ClientBuilder::default().layer(retry_layer).transport(round_robin, is_local);
+        let client = if require_params {
+            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(round_robin, is_local)
+        } else {
+            ClientBuilder::default().layer(retry_layer).transport(round_robin, is_local)
+        };
 
         if !is_local {
             client.set_poll_interval(
@@ -515,6 +604,7 @@ impl<N: Network> ProviderBuilder<N> {
             accept_invalid_certs,
             no_proxy,
             curl_mode,
+            require_params,
             ..
         } = self;
         let url = url?;
@@ -525,7 +615,11 @@ impl<N: Network> ProviderBuilder<N> {
         // If curl_mode is enabled, use CurlTransport instead of RuntimeTransport
         if curl_mode {
             let transport = CurlTransport::new(url).with_headers(headers).with_jwt(jwt);
-            let client = ClientBuilder::default().layer(retry_layer).transport(transport, is_local);
+            let client = if require_params {
+                ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+            } else {
+                ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+            };
 
             let provider = AlloyProviderBuilder::<_, _, N>::default()
                 .with_recommended_fillers()
@@ -543,7 +637,11 @@ impl<N: Network> ProviderBuilder<N> {
             .no_proxy(no_proxy)
             .build();
 
-        let client = ClientBuilder::default().layer(retry_layer).transport(transport, is_local);
+        let client = if require_params {
+            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+        } else {
+            ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+        };
 
         if !is_local {
             client.set_poll_interval(
@@ -592,6 +690,7 @@ fn resolve_path(path: &Path) -> Result<PathBuf, ()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloy_json_rpc::Request;
 
     #[test]
     fn can_auto_correct_missing_prefix() {
@@ -600,5 +699,71 @@ mod tests {
 
         let url = builder.url.unwrap();
         assert_eq!(url, Url::parse("http://localhost:8545").unwrap());
+    }
+
+    #[test]
+    fn fix_serialized_adds_params_for_zero_param_method() {
+        let req: SerializedRequest =
+            Request::<()>::new("eth_blockNumber", 1.into(), ()).try_into().unwrap();
+        assert!(!req.serialized().get().contains("\"params\""));
+        let fixed = fix_serialized(req);
+        assert!(fixed.serialized().get().contains("\"params\":[]"));
+    }
+
+    #[test]
+    fn fix_serialized_preserves_existing_params() {
+        let req: SerializedRequest =
+            Request::new("eth_getBalance", 1.into(), serde_json::json!(["0x1234", "latest"]))
+                .try_into()
+                .unwrap();
+        let original = req.serialized().get().to_string();
+        let fixed = fix_serialized(req);
+        assert_eq!(fixed.serialized().get(), original.as_str());
+    }
+
+    #[test]
+    fn fix_request_packet_single() {
+        let req: SerializedRequest =
+            Request::<()>::new("eth_chainId", 1.into(), ()).try_into().unwrap();
+        let packet = fix_request_packet(RequestPacket::Single(req));
+        match packet {
+            RequestPacket::Single(ser) => {
+                assert!(ser.serialized().get().contains("\"params\":[]"));
+            }
+            _ => panic!("expected single"),
+        }
+    }
+
+    #[test]
+    fn fix_request_packet_batch() {
+        let req1: SerializedRequest =
+            Request::<()>::new("eth_blockNumber", 1.into(), ()).try_into().unwrap();
+        let req2: SerializedRequest =
+            Request::<()>::new("eth_chainId", 2.into(), ()).try_into().unwrap();
+        let packet = fix_request_packet(RequestPacket::Batch(vec![req1, req2]));
+        match packet {
+            RequestPacket::Batch(batch) => {
+                for ser in &batch {
+                    assert!(ser.serialized().get().contains("\"params\":[]"));
+                }
+            }
+            _ => panic!("expected batch"),
+        }
+    }
+
+    #[test]
+    fn params_layer_integration() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let req: SerializedRequest =
+            Request::<()>::new("eth_blockNumber", 1.into(), ()).try_into().unwrap();
+        let req_packet = RequestPacket::Single(req);
+        let fixed = fix_request_packet(req_packet);
+        match fixed {
+            RequestPacket::Single(ser) => {
+                assert!(ser.serialized().get().contains("\"params\":[]"));
+            }
+            _ => panic!("expected single"),
+        }
+        drop(rt);
     }
 }

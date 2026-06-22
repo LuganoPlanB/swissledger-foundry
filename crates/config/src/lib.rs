@@ -309,6 +309,10 @@ pub struct Config {
     pub eth_rpc_headers: Option<Vec<String>>,
     /// Print the equivalent curl command instead of making the RPC request.
     pub eth_rpc_curl: bool,
+    /// Always include `"params":[]` in JSON-RPC requests, even for zero-param
+    /// methods. Required by some RPC endpoints (e.g. Blockscout's /api/eth-rpc).
+    /// Set via `ETH_RPC_REQUIRE_PARAMS=true`.
+    pub eth_rpc_require_params: bool,
     /// etherscan API key, or alias for an `EtherscanConfig` in `etherscan` table
     pub etherscan_api_key: Option<String>,
     /// Multiple etherscan api configs and their aliases
@@ -2707,6 +2711,7 @@ impl Default for Config {
             eth_rpc_timeout: None,
             eth_rpc_headers: None,
             eth_rpc_curl: false,
+            eth_rpc_require_params: false,
             etherscan_api_key: None,
             verbosity: 0,
             remappings: vec![],
