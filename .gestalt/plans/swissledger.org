@@ -1,0 +1,211 @@
+#+TITLE: SwissLedger Fork — Foundry Compatibility Fixes
+#+SUBTITLE: Adapt Foundry to work natively with the SwissLedger chain (id 110) without an RPC proxy
+#+DATE: 2026-06-22
+#+KEYWORDS: swissledger, rpc, json-rpc, forge, cast, compatibility
+
+Reference: Foundry 1.7.1 at commit 4072e48705.
+
+* TODO [#A] JSON-RPC transport: always emit "params" field                          :P0:
+Effort: Medium. Goal: Every JSON-RPC request includes `"params"` (as `[]` when no
+arguments) even for zero-parameter methods like `eth_blockNumber`, `eth_chainId`,
+`eth_gasPrice`, `eth_maxPriorityFeePerGas`.
+
+Notes:
+- The upstream alloy-json-rpc crate (v2.0.1) omits `"params"` when `Params` is a
+  ZST (zero-sized type like `()`). It uses `std::mem::size_of::<Params>() != 0`
+  in `Request::serialize()` (alloy-json-rpc/src/request.rs:214-236).
+- Foundry's provider layer sometimes constructs `Request<()>::new(method, id, ())`
+  (ZST, params omitted) and sometimes `Request<Vec<()>>::new(method, id, vec![])`
+  (params present as empty array).
+- The fix must apply consistently across all RPC transports: MPP HTTP/WS, Curl,
+  and RuntimeTransport.
+- A runtime config option (`ETH_RPC_REQUIRE_PARAMS=true`) is desirable but not
+  mandatory for the MVP.
+
+** TODO [#A] Audit all Request construction sites to find ZST param usage
+Why: Before patching we must know every location that constructs requests with
+zero-sized params types.
+Change: Search casts, forge, common provider code for `Request::new` with `()`
+or ZST param types. Also check alloy-provider internal request construction.
+Tests: None (audit only).
+Done when: A complete list of files and lines is compiled.
+
+** TODO [#A] Patch Request serialization to always include "params"
+Why: The ZST optimization in alloy-json-rpc causes missing `"params"` field.
+Change: In alloy-json-rpc `Request::serialize()` (or via a wrapper), force
+`"params"` emission. Two approaches: (a) patch the upstream crate's serialize
+impl to always emit `"params":[]` for ZST params; (b) replace all ZST params
+with `Vec<()>` at construction sites.
+Tests: Verify `cast block-number`, `cast chain-id`, `cast gas-price` against a
+local HTTP server that validates the `"params"` key is present.
+Done when: Requests to zero-param methods include `"params":[]` in the JSON body.
+
+** TODO [#A] Add env-var opt-in `ETH_RPC_REQUIRE_PARAMS`
+Why: Avoid breaking standard-compliant servers that don't require `"params"`.
+Change: Read `ETH_RPC_REQUIRE_PARAMS` env var; when true (or not empty), use
+the always-emit-params path. Store as a flag in the provider/transport config.
+Tests: Unit test that the flag toggles params emission.
+Done when: Setting the env var forces params inclusion; omitting it preserves
+current behavior.
+
+* TODO [#A] JSON-RPC deserialisation: accept plain-string error responses         :P0:
+Effort: Medium. Goal: When the server returns `{"error": "some string"}` instead
+of `{"error": {"code": -32600, "message": "Invalid Request"}}`, Foundry wraps
+the string into a standard error object instead of crashing with a deserialization
+error.
+
+Notes:
+- alloy-json-rpc `ErrorPayload` has a custom `Deserialize` impl that expects
+  `code` (i64) and `message` (string) fields. A plain string fails.
+- The error surfaces as `TransportError::DeserError { err, text }` or
+  `RpcError::DeserErr`.
+- The fix should intercept the deserialization error, attempt to parse the raw
+  response as a plain-string error, and wrap it as `ErrorPayload { code: -32000,
+  message: <string> }`.
+
+** TODO [#A] Implement lenient ErrorPayload deserialization
+Why: alloy-json-rpc `ErrorPayload` deserialization rejects plain-string errors.
+Change: Add a custom deserializer or wrapper that first tries the standard
+object format, then falls back to accepting a plain string. Use
+`serde_json::Value` as intermediate. Override `RpcError::deser_err` to attempt
+re-parsing the raw text as a string and wrapping it.
+Tests: Unit test with `{"error": "plain string"}` and
+`{"error": {"code": -32000, "message": "msg"}}`.
+Done when: Plain-string server errors produce a usable `ErrorPayload` with code
+-32000 and the string as message instead of crashing.
+
+** TODO [#A] Handle error in cast error display
+Why: After deserialization fix, the error must be surfaced to the user correctly.
+Change: In cast's error handling, ensure the wrapped string error is displayed
+with a clear message like "Server error: <string>".
+Tests: Run `cast gas-price --rpc-url https://explorer.ledger.swiss/api/eth-rpc`
+and verify the error message is human-readable.
+Done when: Server error strings are displayed to the user without a crash.
+
+* TODO [#B] forge build: honour --evm-version over foundry.toml                   :P1:
+Effort: Medium. Goal: `forge build --evm-version london` takes precedence over
+`evm_version = "cancun"` in `foundry.toml`.
+
+Notes:
+- The merge chain in `BuildOpts::from() -> Figment` (cli/src/opts/build/core.rs:185-218)
+  *should* give CLI priority over config file. But the report says it doesn't work.
+- Possible causes: (a) `normalize_evm_version()` in config/src/lib.rs:1056 mutates
+  the evm_version after the Figment extract, (b) `CompilationSettings` /
+  `SettingsOverrides` override at a lower level, (c) serialization issue with
+  `#[serde(flatten)]` on `CompilerOpts` in `BuildOpts`.
+- Investigation needed to reproduce and identify the exact root cause.
+
+** TODO [#B] Reproduce the bug with a minimal test case
+Why: Need to confirm the bug and its exact trigger before fixing.
+Change: Write a test that creates a foundry.toml with `evm_version = "cancun"`,
+runs `forge build --evm-version london`, and checks the compiler settings use
+London. Use `TestProject` from test-utils.
+Tests: The reproduction test itself.
+Done when: Test confirms `--evm-version london` is ignored when toml sets cancun.
+
+** TODO [#B] Fix the override priority
+Why: CLI should always beat config file for evm_version.
+Change: Depends on root cause found above. Likely fix at Figment merge level or
+by applying the CLI value after the Config is extracted. May need to
+post-process `config.evm_version = args.evm_version.unwrap_or(config.evm_version)`.
+Tests: Reproduction test now passes. Also test that omitting --evm-version uses
+the toml value.
+Done when: `--evm-version` takes precedence; omitting it falls back to toml.
+
+** TODO [#C] Consider profile inheritance from default
+Why: Currently profiles don't inherit from `[profile.default]`, forcing users to
+duplicate all fields. This is a separate quality-of-life improvement.
+Change: Make `Figment` merge use `profile.default` as a fallback for any
+profile that doesn't explicitly set a key. This is more complex and may have
+unintended side effects.
+Tests: Profile with only `evm_version` set inherits `solc`, `optimizer`, etc.
+Done when: A minimal `[profile.london]` with only `evm_version = "london"` works.
+
+* TODO [#B] cast: fix bytes32[] argument parsing                                      :P1:
+Effort: Medium. Goal: `cast call <addr> "func(bytes32[])" "[0xAAA..., 0xBBB...]"`
+correctly parses and ABI-encodes dynamic bytes32 arrays.
+
+Notes:
+- The pipeline: CLI string → `coerce_value("bytes32[]", "[0xAAA...]")` →
+  `DynSolType::coerce_str` → winnow parser → `array()` → `fixed_bytes(32)`.
+- alloy-dyn-abi's `fixed_bytes(32)` parser requires exactly 64 hex chars. The
+  array parser should split on `,` and parse each element independently.
+- The errors in FORK.md suggest the parser isn't correctly splitting elements
+  inside array brackets, or the hex validation is too strict for comma-separated
+  values.
+
+** TODO [#B] Reproduce the bug
+Why: Confirm the exact parsing failure before fixing.
+Change: Write a test that calls `coerce_value("bytes32[]", "[0x<64-char-hex>]")`
+and verify it fails. Test multiple elements, empty array, and edge cases.
+Tests: The reproduction test.
+Done when: Test demonstrates the failure described in FORK.md.
+
+** TODO [#B] Fix the array element splitting in the parser
+Why: The parser fails to correctly tokenize comma-separated hex strings inside
+array brackets for bytes32 elements.
+Change: Investigate alloy-dyn-abi's array parser (`coerce.rs` lines 113-115,
+186-192). The fix likely involves ensuring the array element parser correctly
+handles the comma delimiter and doesn't consume characters from adjacent elements
+or the closing bracket. May need to patch the `array_parser` or the `fixed_bytes`
+parser to stop at `,` or `]`.
+Tests: Test single element, multiple elements, empty array, mixed-length edge
+cases.
+Done when: `cast call <addr> "func(bytes32[])" "[0x...]"` produces correct
+calldata instead of a parser error.
+
+* TODO [#B] cast: fall back to 0 gas price on eth_gasPrice error                    :P2:
+Effort: Small. Goal: When `eth_gasPrice` fails (returns error or 500), cast
+defaults to gas price 0 and proceeds instead of erroring out. This handles
+gas-free chains like SwissLedger.
+
+Notes:
+- Combined fix for FORK.md items #5 and #8.
+- When the user hasn't set an explicit gas price and the server errors on
+  `eth_gasPrice`, assume gas price 0.
+- The `--gas-price 0` flag already works; this makes it automatic.
+
+** TODO [#B] Intercept eth_gasPrice error and fall back to 0
+Why: Avoid requiring `--gas-price 0` on gas-free chains.
+Change: In cast's transaction building code (crates/cast/src/tx.rs), catch the
+error from `eth_gasPrice`, log a warning, and set gas_price to 0. Only do this
+when the user hasn't explicitly set `--gas-price`.
+Tests: Mock an RPC endpoint that returns error for `eth_gasPrice`; verify cast
+proceeds with gas_price=0.
+Done when: A chain that errors on `eth_gasPrice` doesn't require `--gas-price 0`.
+
+* TODO [#B] cast: fall back to user gas limit on eth_estimateGas error               :P2:
+Effort: Small. Goal: When `eth_estimateGas` fails, cast uses the `--gas-limit`
+value (or a sensible default) instead of aborting.
+
+Notes:
+- SwissLedger's `eth_estimateGas` returns "Incorrect number of params" error.
+- If the user passes `--gas-limit`, that should be used directly when estimate fails.
+- If no `--gas-limit`, fall back to a default (e.g., block gas limit or 20M).
+
+** TODO [#B] Intercept eth_estimateGas error and use configured gas limit
+Why: Avoid requiring manual gas limit on chains with broken estimateGas.
+Change: In cast's `estimate_gas()` method (crates/cast/src/tx.rs:693-711), catch
+non-revert errors (i.e., server errors, not execution reverts) and fall back to
+`--gas-limit` if provided, or a default. Log a warning.
+Tests: Mock an RPC endpoint that errors on `eth_estimateGas`; verify cast uses
+the fallback gas limit and proceeds.
+Done when: A chain with broken `eth_estimateGas` doesn't block transaction sending.
+
+* TODO [#C] HTTP transport: always read full response before closing connection      :P3:
+Effort: Small. Goal: Prevent `BrokenPipeError` on RPC proxies by ensuring the HTTP
+client reads the complete response body before closing the connection.
+
+Notes:
+- This is a minor issue that affects proxy processes but not direct RPC usage.
+- The fix ensures clean TCP connection teardown.
+
+** TODO [#C] Drain response body before dropping the connection
+Why: Prevent proxy BrokenPipe errors.
+Change: In the HTTP transport layer (MppHttpTransport, RuntimeTransport), ensure
+the response body is fully consumed before the connection is closed. This may
+already be handled by reqwest's Drop impl, but verify and add explicit drain if
+needed.
+Tests: Run cast against the Python RPC proxy (`scripts/rpc-proxy.py`) and verify
+no BrokenPipeError in the proxy logs.
+Done when: Proxy receives clean connection close without broken pipe errors.
