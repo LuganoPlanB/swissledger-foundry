@@ -37,6 +37,21 @@ help: ## Display this help.
 build: ## Build the project.
 	cargo build --locked --features "$(FEATURES)" --profile "$(PROFILE)"
 
+.PHONY: build-static
+build-static: ## Build fully static binaries (musl, no dynamic linkage).
+# Prerequisites:
+#   rustup target add x86_64-unknown-linux-musl
+#   sudo apt-get install musl-tools
+#   for dir in asm-generic drm linux mtd rdma sound video xen; do \
+#     sudo ln -s /usr/include/$$dir /usr/include/x86_64-linux-musl/$$dir; done
+	PKG_CONFIG_ALLOW_CROSS=1 \
+	CC_x86_64_unknown_linux_musl=musl-gcc \
+	cargo build \
+		--locked \
+		--profile dist \
+		--target x86_64-unknown-linux-musl \
+		--features "asm-keccak cli"
+
 .PHONY: build-docker
 build-docker: ## Build the docker image.
 	docker build . -t "$(DOCKER_IMAGE_NAME)" \
