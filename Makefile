@@ -35,7 +35,7 @@ help: ## Display this help.
 
 .PHONY: build
 build: ## Build the project.
-	cargo build --locked --features "$(FEATURES)" --profile "$(PROFILE)"
+	cargo build --features "$(FEATURES)" --profile "$(PROFILE)"
 
 .PHONY: build-static
 build-static: ## Build fully static, release-optimized binaries (musl).

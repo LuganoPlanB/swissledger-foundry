@@ -2916,10 +2916,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c673075a2e0e5f4a1dde27ce9dee1ea4558c7ffe648f576438a20ca1d2acc4b0"
 dependencies = [
  "iana-time-zone",
- "js-sys",
  "num-traits",
  "serde",
- "wasm-bindgen",
  "windows-link",
 ]
 
@@ -4863,23 +4861,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf"
 dependencies = [
  "percent-encoding",
-]
-
-[[package]]
-name = "foundry-bench"
-version = "1.7.1"
-dependencies = [
- "chrono",
- "clap",
- "color-eyre",
- "eyre",
- "foundry-common",
- "foundry-compilers 0.20.0",
- "foundry-test-utils",
- "once_cell",
- "rayon",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -11921,7 +11902,7 @@ dependencies = [
  "toml_datetime 1.1.1+spec-1.1.0",
  "toml_parser",
  "toml_writer",
- "winnow 1.0.1",
+ "winnow 1.0.3",
 ]
 
 [[package]]
