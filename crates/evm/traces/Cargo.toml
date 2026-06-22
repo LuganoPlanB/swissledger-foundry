@@ -32,7 +32,7 @@ alloy-primitives = { workspace = true, features = [
 alloy-sol-types.workspace = true
 revm-inspectors.workspace = true
 
-tempo-contracts.workspace = true
+tempo-contracts = { workspace = true, optional = true }
 tempo-precompiles.workspace = true
 
 async-trait.workspace = true
@@ -50,3 +50,6 @@ tempfile.workspace = true
 tokio = { workspace = true, features = ["time", "macros"] }
 tracing.workspace = true
 yansi.workspace = true
+
+[features]
+tempo-contracts = ["dep:tempo-contracts"]

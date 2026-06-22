@@ -26,6 +26,7 @@ use foundry_evm_core::{
 use itertools::Itertools;
 use revm_inspectors::tracing::types::{DecodedCallLog, DecodedCallTrace};
 use std::{collections::BTreeMap, sync::OnceLock};
+#[cfg(feature = "tempo-contracts")]
 use tempo_contracts::precompiles::{
     IAccountKeychain, IFeeManager, IStablecoinDEX, ITIP20Factory, ITIP403Registry, IValidatorConfig,
 };

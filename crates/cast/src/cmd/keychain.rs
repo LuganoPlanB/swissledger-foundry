@@ -18,6 +18,7 @@ use foundry_common::{
 };
 use foundry_evm::hardfork::TempoHardfork;
 use tempo_alloy::{TempoNetwork, provider::TempoProviderExt};
+#[cfg(feature = "tempo-contracts")]
 use tempo_contracts::precompiles::{
     ACCOUNT_KEYCHAIN_ADDRESS, IAccountKeychain,
     IAccountKeychain::{
