@@ -22,6 +22,7 @@ use crate::{
     cmd::tip20::iso4217_warning_message,
     tx::{self, CastTxBuilder, CastTxSender, SendTxOpts},
 };
+#[cfg(feature = "tempo-contracts")]
 use tempo_contracts::precompiles::{TIP20_FACTORY_ADDRESS, is_iso4217_currency};
 
 /// CLI arguments for `cast send`.

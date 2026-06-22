@@ -373,12 +373,7 @@ alloy-rpc-types-engine = { version = "2.0.1", default-features = false }
 alloy-rpc-types-eth = { version = "2.0.1", default-features = false }
 alloy-serde = { version = "2.0.1", default-features = false }
 alloy-signer = { version = "2.0.1", default-features = false }
-alloy-signer-aws = { version = "2.0.1", default-features = false }
-alloy-signer-gcp = { version = "2.0.1", default-features = false }
-alloy-signer-ledger = { version = "2.0.1", default-features = false }
 alloy-signer-local = { version = "2.0.1", default-features = false }
-alloy-signer-trezor = { version = "2.0.1", default-features = false }
-alloy-signer-turnkey = { version = "2.0.1", default-features = false }
 alloy-transport = { version = "2.0.1", default-features = false }
 alloy-transport-http = { version = "2.0.1", default-features = false }
 alloy-transport-ipc = { version = "2.0.1", default-features = false }
@@ -509,12 +504,6 @@ flate2 = "1.1"
 ethereum_ssz = "0.10"
 
 # Tempo
-mpp = { git = "https://github.com/tempoxyz/mpp-rs", rev = "554d20112eb014bd223d54de7f152ca59b2aa4fd", default-features = false, features = [
-    "tempo",
-    "client",
-    "reqwest-rustls-tls",
-    "ws",
-] }
 tempo-chainspec = { git = "https://github.com/tempoxyz/tempo", rev = "1e5a82dff207e2cbd6cecdcfb8ff3cd2e39baa69", default-features = false }
 tempo-primitives = { git = "https://github.com/tempoxyz/tempo", rev = "1e5a82dff207e2cbd6cecdcfb8ff3cd2e39baa69", default-features = false, features = [
     "serde",
