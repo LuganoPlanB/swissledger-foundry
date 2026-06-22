@@ -51,7 +51,7 @@ forge-script.workspace = true
 forge-sol-macro-gen.workspace = true
 foundry-cli.workspace = true
 foundry-debugger.workspace = true
-foundry-wallets = { workspace = true, features = ["browser", "tempo"] }
+foundry-wallets = { workspace = true, features = ["tempo"] }
 
 alloy-chains.workspace = true
 alloy-consensus.workspace = true
@@ -83,8 +83,8 @@ strum = { workspace = true, features = ["derive"] }
 thiserror.workspace = true
 tokio = { workspace = true, features = ["time"] }
 toml_edit.workspace = true
-watchexec = "8.0"
-watchexec-events = "6.0"
+watchexec = "8.2"
+watchexec-events = "6.1"
 watchexec-signals = "5.0"
 clearscreen = "4.0"
 evm-disassembler.workspace = true

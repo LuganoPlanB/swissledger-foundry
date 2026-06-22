@@ -29,7 +29,7 @@ foundry-config.workspace = true
 foundry-debugger.workspace = true
 foundry-evm.workspace = true
 foundry-evm-networks.workspace = true
-foundry-wallets = { workspace = true, features = ["browser", "tempo"] }
+foundry-wallets = { workspace = true, features = ["tempo"] }
 forge-fmt.workspace = true
 
 alloy-chains.workspace = true

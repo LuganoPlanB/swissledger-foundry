@@ -386,17 +386,17 @@ alloy-hardforks = { version = "0.4.7", default-features = false }
 alloy-op-hardforks = { version = "0.4.7", default-features = false }
 
 ## alloy-core
-alloy-dyn-abi = "1.5.2"
-alloy-json-abi = "1.5.2"
-alloy-primitives = { version = "1.5.2", features = [
+alloy-dyn-abi = "1.6.0"
+alloy-json-abi = "1.6.0"
+alloy-primitives = { version = "1.6.0", features = [
     "getrandom",
     "rand",
     "map-fxhash",
     "map-foldhash",
 ] }
-alloy-sol-macro-expander = "1.5.2"
-alloy-sol-macro-input = "1.5.2"
-alloy-sol-types = "1.5.2"
+alloy-sol-macro-expander = "1.6.0"
+alloy-sol-macro-input = "1.6.0"
+alloy-sol-types = "1.6.0"
 
 alloy-chains = "0.2"
 alloy-rlp = "0.3"
@@ -440,7 +440,7 @@ tikv-jemallocator = "0.7"
 
 # misc
 auto_impl = "1"
-bytes = "1.11"
+bytes = "1.12"
 walkdir = "2"
 prettyplease = "0.2"
 base64 = "0.22"
@@ -459,16 +459,16 @@ evmole = "0.8"
 eyre = "0.6"
 figment = { package = "figment2", version = "0.11" }
 futures = { version = "0.3", default-features = false }
-hyper = "1.8"
+hyper = "1.10"
 indicatif = "0.18"
 itertools = "0.14"
 jsonpath_lib = "0.3"
 k256 = "0.13"
 mesc = "0.3"
-memchr = "2.7"
+memchr = "2.8"
 num-format = "0.4"
 parking_lot = "0.12"
-proptest = "1.9.0"
+proptest = "1.11.0"
 rand = "0.9"
 rand_08 = { package = "rand", version = "0.8" }
 rayon = "1"
@@ -482,7 +482,7 @@ similar-asserts = "2.0"
 soldeer-commands = "=0.10.0"
 soldeer-core = { version = "=0.10.1", features = ["serde"] }
 strum = "0.27"
-tempfile = "3.23"
+tempfile = "3.27"
 tokio = "1"
 tokio-tungstenite = { version = "0.28", features = ["rustls-tls-webpki-roots"] }
 toml = "1.1"
@@ -492,7 +492,7 @@ tower-http = "0.6"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 url = "2"
-vergen = { package = "vergen-gitcl", version = "10.0.0-beta.5", default-features = false, features = [
+vergen = { package = "vergen-gitcl", version = "10.0.0-beta.6", default-features = false, features = [
     "build",
     "cargo",
 ] }
@@ -503,7 +503,7 @@ jiff = { version = "0.2", default-features = false, features = [
     "perf-inline",
 ] }
 heck = "0.5"
-uuid = "1.19.0"
+uuid = "1.23.3"
 flate2 = "1.1"
 ethereum_ssz = "0.10"
 
