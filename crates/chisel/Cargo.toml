@@ -19,7 +19,7 @@ path = "bin/main.rs"
 
 [dependencies]
 # forge
-forge-doc.workspace = true
+forge-doc = { workspace = true, optional = true }
 forge-fmt.workspace = true
 foundry-cli.workspace = true
 foundry-common.workspace = true
@@ -70,3 +70,5 @@ asm-keccak = ["alloy-primitives/asm-keccak"]
 jemalloc = ["foundry-cli/jemalloc"]
 mimalloc = ["foundry-cli/mimalloc"]
 tracy-allocator = ["foundry-cli/tracy-allocator"]
+doc = ["dep:forge-doc"]
+doc = ["dep:forge-doc"]

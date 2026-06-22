@@ -501,7 +501,6 @@ jiff = { version = "0.2", default-features = false, features = [
 heck = "0.5"
 uuid = "1.23.3"
 flate2 = "1.1"
-ethereum_ssz = "0.10"
 
 # Tempo
 tempo-chainspec = { git = "https://github.com/tempoxyz/tempo", rev = "1e5a82dff207e2cbd6cecdcfb8ff3cd2e39baa69", default-features = false }

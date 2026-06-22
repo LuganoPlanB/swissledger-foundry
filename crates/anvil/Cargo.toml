@@ -99,7 +99,6 @@ tempfile.workspace = true
 itertools.workspace = true
 rand_08.workspace = true
 eyre.workspace = true
-ethereum_ssz.workspace = true
 
 # cli
 clap = { version = "4", features = [
