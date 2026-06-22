@@ -63,7 +63,7 @@ alloy-provider = { workspace = true, features = ["reqwest", "ws", "ipc"] }
 alloy-signer.workspace = true
 alloy-transport.workspace = true
 
-tempo-alloy.workspace = true
+tempo-alloy = { workspace = true, optional = true }
 
 revm.workspace = true
 
@@ -126,8 +126,3 @@ aws-kms = ["foundry-wallets/aws-kms"]
 gcp-kms = ["foundry-wallets/gcp-kms"]
 turnkey = ["foundry-wallets/turnkey"]
 isolate-by-default = ["foundry-config/isolate-by-default"]
-doc = ["dep:forge-doc"]
-doc = ["dep:forge-doc"]
-soldeer = ["dep:soldeer-commands", "dep:soldeer-core"]
-watch = ["dep:watchexec", "dep:watchexec-events", "dep:watchexec-signals", "dep:clearscreen"]
-debugger = ["dep:foundry-debugger"]

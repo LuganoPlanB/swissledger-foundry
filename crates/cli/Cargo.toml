@@ -20,7 +20,7 @@ foundry-evm.workspace = true
 foundry-evm-networks.workspace = true
 foundry-wallets = { workspace = true, features = ["tempo"] }
 
-tempo-primitives.workspace = true
+tempo-primitives = { workspace = true, optional = true }
 
 foundry-compilers.workspace = true
 solar.workspace = true

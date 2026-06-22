@@ -32,7 +32,7 @@ foundry-primitives.workspace = true
 tempo-chainspec.workspace = true
 tempo-primitives.workspace = true
 tempo-precompiles.workspace = true
-tempo-evm = { workspace = true, optional = true }
+tempo-evm.workspace = true
 tempo-revm.workspace = true
 
 # alloy
@@ -111,6 +111,7 @@ chrono.workspace = true
 ctrlc = { version = "3", optional = true }
 fdlimit = { version = "0.3", optional = true }
 
+tempo-alloy = { workspace = true, optional = true }
 [dev-dependencies]
 alloy-provider = { workspace = true, features = ["txpool-api"] }
 alloy-pubsub.workspace = true
@@ -120,11 +121,9 @@ foundry-test-utils.workspace = true
 tokio = { workspace = true, features = ["full"] }
 
 op-alloy-rpc-types.workspace = true
-tempo-alloy.workspace = true
 
 [features]
 default = ["cli", "jemalloc", "asm-keccak"]
-tempo-evm = ["dep:tempo-evm"]
 asm-keccak = ["alloy-primitives/asm-keccak", "revm/asm-keccak"]
 jemalloc = ["foundry-cli/jemalloc"]
 mimalloc = ["foundry-cli/mimalloc"]
