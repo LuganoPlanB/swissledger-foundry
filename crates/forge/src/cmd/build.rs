@@ -74,10 +74,17 @@ impl BuildArgs {
     pub async fn run(self) -> Result<ProjectCompileOutput> {
         let mut config = self.load_config()?;
 
+        if let Some(evm_version) = self.build.compiler.evm_version {
+            config.evm_version = evm_version;
+        }
+
         if install::install_missing_dependencies(&mut config).await && config.auto_detect_remappings
         {
             // need to re-configure here to also catch additional remappings
             config = self.load_config()?;
+            if let Some(evm_version) = self.build.compiler.evm_version {
+                config.evm_version = evm_version;
+            }
         }
 
         self.check_soldeer_lock_consistency(&config).await;

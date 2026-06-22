@@ -5187,6 +5187,34 @@ mod tests {
         });
     }
 
+    #[test]
+    fn test_evm_version_cli_overrides_toml() {
+        figment::Jail::expect_with(|jail| {
+            jail.set_env("FOUNDRY_PROFILE", "default");
+            jail.create_file(
+                "foundry.toml",
+                r"
+                [default]
+                solc_version = '0.8.27'
+                evm_version = 'cancun'
+            ",
+            )?;
+
+            let loaded = Config::load().unwrap().sanitized();
+            assert_eq!(loaded.evm_version, EvmVersion::Cancun);
+
+            let mut config_figment = Config::figment_with_root(jail.directory());
+            config_figment = config_figment.merge(("evm_version", "london"));
+            let overridden: Config = config_figment.extract().unwrap();
+            assert_eq!(
+                overridden.evm_version,
+                EvmVersion::London,
+                "CLI --evm-version london should override toml cancun"
+            );
+            Ok(())
+        });
+    }
+
     // a test to print the config, mainly used to update the example config in the README
     #[expect(clippy::disallowed_macros)]
     #[test]
