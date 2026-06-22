@@ -182,6 +182,25 @@ impl LazySessionProvider {
     }
 }
 
+/// Normalize a JSON-RPC response body that contains a plain-string error field.
+///
+/// Some RPC endpoints (e.g. Blockscout /api/eth-rpc) return non-standard errors:
+/// `{"error": "some string"}` instead of `{"error": {"code": -32000, "message": "..."}}`.
+/// This function wraps the plain string into a standard error object so the
+/// JSON-RPC deserializer doesn't crash.
+///
+/// Returns `None` if the body is already standard-form or can't be parsed.
+fn normalize_error_response(body: &[u8]) -> Option<Vec<u8>> {
+    let mut v: serde_json::Value = serde_json::from_slice(body).ok()?;
+    let err = v.get("error")?;
+    if err.is_string() {
+        let msg = err.as_str().unwrap().to_owned();
+        v["error"] = serde_json::json!({"code": -32000, "message": msg});
+        return Some(serde_json::to_vec(&v).ok()?);
+    }
+    None
+}
+
 /// HTTP transport with automatic MPP (Machine Payments Protocol) 402 handling.
 ///
 /// Generic over the payment provider `P`. Works as a normal HTTP transport until
@@ -542,8 +561,10 @@ where
             ));
         }
 
-        serde_json::from_slice(&body)
-            .map_err(|err| TransportError::deser_err(err, String::from_utf8_lossy(&body)))
+        let normalized = normalize_error_response(&body);
+        let body_ref: &[u8] = normalized.as_deref().unwrap_or(&body);
+        serde_json::from_slice(body_ref)
+            .map_err(|err| TransportError::deser_err(err, String::from_utf8_lossy(body_ref)))
     }
 }
 
@@ -954,5 +975,28 @@ mod tests {
             b64(serde_json::json!({"amount":"1000","currency":"0x20c0","recipient":"0xabc"}))
         );
         assert_eq!(extract(vec![&no_details]), vec![(None, Some("0x20c0".into()))]);
+    }
+
+    #[test]
+    fn normalize_plain_string_error() {
+        let body = br#"{"jsonrpc":"2.0","error":"Internal server error","id":0}"#;
+        let normalized = normalize_error_response(body).unwrap();
+        let v: serde_json::Value = serde_json::from_slice(&normalized).unwrap();
+        let err = v["error"].as_object().unwrap();
+        assert_eq!(err["code"], -32000);
+        assert_eq!(err["message"], "Internal server error");
+    }
+
+    #[test]
+    fn normalize_preserves_standard_error() {
+        let body =
+            br#"{"jsonrpc":"2.0","error":{"code":-32600,"message":"Invalid Request"},"id":0}"#;
+        assert!(normalize_error_response(body).is_none());
+    }
+
+    #[test]
+    fn normalize_preserves_success_response() {
+        let body = br#"{"jsonrpc":"2.0","result":"0x1","id":0}"#;
+        assert!(normalize_error_response(body).is_none());
     }
 }
