@@ -9,26 +9,35 @@ permissions:
   contents: write
 
 jobs:
-  tag:
+  semver:
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.tag.outputs.new_tag }}
-      version: ${{ steps.tag.outputs.new_version }}
+      version: ${{ steps.semver.outputs.next }}
+      bump: ${{ steps.semver.outputs.bump }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Bump version and push tag
-        id: tag
-        uses: mathieudutour/github-tag-action@v6
+      - name: Calculate next version
+        id: semver
+        uses: ietf-tools/semver-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: false
+          token: ${{ github.token }}
+          branch: main
+          fallbackTag: v0.0.0
+          noNewCommitBehavior: current
+          noVersionBumpBehavior: current
+
+      - name: Create and push tag
+        if: steps.semver.outputs.bump != 'none'
+        run: |
+          git tag ${{ steps.semver.outputs.next }}
+          git push origin ${{ steps.semver.outputs.next }}
 
   build:
-    needs: tag
-    if: needs.tag.outputs.new_tag != ''
+    needs: semver
+    if: needs.semver.outputs.bump != 'none'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -68,7 +77,7 @@ jobs:
           path: target/x86_64-unknown-linux-musl/dist/${{ matrix.binary }}
 
   release:
-    needs: [tag, build]
+    needs: [semver, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -80,7 +89,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.tag.outputs.version }}
-          name: ${{ needs.tag.outputs.version }}
+          tag_name: ${{ needs.semver.outputs.version }}
+          name: ${{ needs.semver.outputs.version }}
           generate_release_notes: true
           files: artifacts/*/swissledger-*
