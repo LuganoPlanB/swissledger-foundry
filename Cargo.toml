@@ -479,7 +479,7 @@ semver = "1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["arbitrary_precision"] }
 similar-asserts = "2.0"
-soldeer-commands = "=0.10.0"
+soldeer-commands = "=0.11.0"
 soldeer-core = { version = "=0.10.1", features = ["serde"] }
 strum = "0.27"
 tempfile = "3.23"
