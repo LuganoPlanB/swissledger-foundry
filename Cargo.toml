@@ -437,7 +437,7 @@ thiserror = "2"
 
 # allocators
 mimalloc = "0.1"
-tikv-jemallocator = "0.6"
+tikv-jemallocator = "0.7"
 
 # misc
 auto_impl = "1"
