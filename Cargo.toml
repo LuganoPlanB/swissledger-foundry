@@ -27,6 +27,7 @@ members = [
     "crates/primitives/",
     "crates/script-sequence/",
     "crates/test-utils/",
+    "crates/wallets/",
     "crates/cli-markdown/",
 ]
 resolver = "2"
@@ -337,7 +338,7 @@ foundry-evm-sancov = { path = "crates/evm/sancov" }
 foundry-evm-traces = { path = "crates/evm/traces" }
 foundry-macros = { path = "crates/macros" }
 foundry-test-utils = { path = "crates/test-utils" }
-foundry-wallets = { version = "0.1.0", default-features = false }
+foundry-wallets = { path = "crates/wallets", default-features = false }
 foundry-linking = { path = "crates/linking" }
 foundry-primitives = { path = "crates/primitives" }
 

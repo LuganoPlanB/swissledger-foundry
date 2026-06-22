@@ -1,0 +1,56 @@
+[package]
+name = "foundry-wallets"
+version = "0.1.0"
+authors = ["Foundry Contributors"]
+edition = "2024"
+rust-version = "1.93"
+description = "Wallet integrations for Foundry (SwissLedger fork)"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LuganoPlanB/swissledger-foundry"
+
+[lib]
+name = "foundry_wallets"
+path = "src/lib.rs"
+
+[features]
+default = []
+aws-kms = ["dep:alloy-signer-aws", "dep:aws-config"]
+gcp-kms = ["dep:alloy-signer-gcp"]
+ledger = ["dep:alloy-signer-ledger"]
+tempo = ["dep:tempo-primitives", "dep:alloy-rlp", "dep:toml"]
+trezor = ["dep:alloy-signer-trezor"]
+turnkey = ["dep:alloy-signer-turnkey"]
+
+[dependencies]
+alloy-consensus = { version = "2.0.0", default-features = false }
+alloy-dyn-abi = "1.5.2"
+alloy-network = { version = "2.0.0", default-features = false }
+alloy-primitives = { version = "1.5.2", features = ["getrandom", "rand", "map-fxhash", "map-foldhash"] }
+alloy-rlp = { version = "0.3", optional = true }
+alloy-signer = { version = "2.0.0", features = ["eip712"], default-features = false }
+alloy-signer-aws = { version = "2.0.0", features = ["eip712"], optional = true, default-features = false }
+alloy-signer-gcp = { version = "2.0.0", features = ["eip712"], optional = true, default-features = false }
+alloy-signer-ledger = { version = "2.0.0", features = ["eip712"], optional = true, default-features = false }
+alloy-signer-local = { version = "2.0.0", features = ["mnemonic", "keystore"], default-features = false }
+alloy-signer-trezor = { version = "2.0.0", optional = true, default-features = false }
+alloy-signer-turnkey = { version = "2.0.0", features = ["eip712"], optional = true, default-features = false }
+alloy-sol-types = "1.5.2"
+async-trait = "0.1"
+aws-config = { version = "1", optional = true, default-features = true }
+clap = { version = "4", features = ["derive", "env", "unicode", "wrap_help"] }
+derive_builder = "0.20"
+dirs = "6"
+eth-keystore = "0.5.0"
+eyre = "0.6"
+rpassword = "7"
+serde = { version = "1.0", features = ["derive", "rc"] }
+tempo-primitives = { version = "1.6", features = ["std", "serde"], optional = true, default-features = false }
+thiserror = "2"
+serde_json = "1.0"
+toml = { version = "0.9", optional = true }
+tracing = "0.1"
+
+[dev-dependencies]
+reqwest = { version = "0.13", features = ["rustls", "json"], default-features = false }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+serde_json = "1.0"
