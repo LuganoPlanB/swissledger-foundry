@@ -43,14 +43,14 @@ yansi.workspace = true
 chrono.workspace = true
 
 # bin
-forge-doc.workspace = true
+forge-doc = { workspace = true, optional = true }
 forge-fmt.workspace = true
 forge-lint.workspace = true
 forge-verify.workspace = true
 forge-script.workspace = true
 forge-sol-macro-gen.workspace = true
 foundry-cli.workspace = true
-foundry-debugger.workspace = true
+foundry-debugger = { workspace = true, optional = true }
 foundry-wallets = { workspace = true, features = ["tempo"] }
 
 alloy-chains.workspace = true
@@ -83,10 +83,10 @@ strum = { workspace = true, features = ["derive"] }
 thiserror.workspace = true
 tokio = { workspace = true, features = ["time"] }
 toml_edit.workspace = true
-watchexec = "8.2"
-watchexec-events = "6.1"
-watchexec-signals = "5.0"
-clearscreen = "4.0"
+watchexec = { version = "8.2", optional = true }
+watchexec-events = { version = "6.1", optional = true }
+watchexec-signals = { version = "5.0", optional = true }
+clearscreen = { version = "4.0", optional = true }
 evm-disassembler.workspace = true
 path-slash.workspace = true
 reqwest = { workspace = true, features = ["json"] }
@@ -98,8 +98,8 @@ tower-http = { workspace = true, features = ["fs"] }
 opener = "0.8"
 
 # soldeer
-soldeer-commands.workspace = true
-soldeer-core.workspace = true
+soldeer-commands = { workspace = true, optional = true }
+soldeer-core = { workspace = true, optional = true }
 quick-junit = "0.5.2"
 
 [dev-dependencies]
@@ -126,3 +126,8 @@ aws-kms = ["foundry-wallets/aws-kms"]
 gcp-kms = ["foundry-wallets/gcp-kms"]
 turnkey = ["foundry-wallets/turnkey"]
 isolate-by-default = ["foundry-config/isolate-by-default"]
+doc = ["dep:forge-doc"]
+doc = ["dep:forge-doc"]
+soldeer = ["dep:soldeer-commands", "dep:soldeer-core"]
+watch = ["dep:watchexec", "dep:watchexec-events", "dep:watchexec-signals", "dep:clearscreen"]
+debugger = ["dep:foundry-debugger"]

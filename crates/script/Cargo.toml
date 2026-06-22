@@ -21,7 +21,7 @@ foundry-common.workspace = true
 foundry-evm.workspace = true
 foundry-evm-networks.workspace = true
 alloy-evm.workspace = true
-foundry-debugger.workspace = true
+foundry-debugger = { workspace = true, optional = true }
 foundry-cheatcodes.workspace = true
 foundry-wallets = { workspace = true, features = ["tempo"] }
 foundry-linking.workspace = true
@@ -62,3 +62,4 @@ tempo-primitives.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
+debugger = ["dep:foundry-debugger"]

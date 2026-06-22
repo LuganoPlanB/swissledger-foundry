@@ -26,7 +26,7 @@ foundry-block-explorers.workspace = true
 foundry-common.workspace = true
 foundry-compilers.workspace = true
 foundry-config.workspace = true
-foundry-debugger.workspace = true
+foundry-debugger = { workspace = true, optional = true }
 foundry-evm.workspace = true
 foundry-evm-networks.workspace = true
 foundry-wallets = { workspace = true, features = ["tempo"] }
@@ -110,3 +110,4 @@ gcp-kms = ["foundry-wallets/gcp-kms"]
 turnkey = ["foundry-wallets/turnkey"]
 isolate-by-default = ["foundry-config/isolate-by-default"]
 tempo-contracts = ["dep:tempo-contracts"]
+debugger = ["dep:foundry-debugger"]
