@@ -201,7 +201,10 @@ pub fn find_source(
 /// Helper function to coerce a value to a [DynSolValue] given a type string
 pub fn coerce_value(ty: &str, arg: &str) -> Result<DynSolValue> {
     let ty = DynSolType::parse(ty)?;
-    Ok(DynSolType::coerce_str(&ty, arg)?)
+    DynSolType::coerce_str(&ty, arg).map_err(|e| {
+        let msg = format!("Failed to parse argument `{arg}` as type `{ty}`: {e}");
+        eyre::eyre!("{msg}")
+    })
 }
 
 #[cfg(test)]
@@ -313,5 +316,55 @@ mod tests {
         let res = encode_args(&params, &args);
         assert!(res.is_err());
         assert!(format!("{}", res.unwrap_err()).contains("encode length mismatch"));
+    }
+
+    #[test]
+    fn coerce_bytes32_array_single_element() {
+        let hex = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        let arg = format!("[{hex}]");
+        let result = coerce_value("bytes32[]", &arg);
+        assert!(result.is_ok(), "Failed to parse bytes32[] with single element: {result:?}");
+        let val = result.unwrap();
+        if let DynSolValue::Array(arr) = val {
+            assert_eq!(arr.len(), 1);
+        } else {
+            panic!("expected array, got {val:?}");
+        }
+    }
+
+    #[test]
+    fn coerce_bytes32_array_multiple_elements() {
+        let hex1 = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        let hex2 = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+        let arg = format!("[{hex1}, {hex2}]");
+        let result = coerce_value("bytes32[]", &arg);
+        assert!(result.is_ok(), "Failed: {result:?}");
+        let val = result.unwrap();
+        if let DynSolValue::Array(arr) = val {
+            assert_eq!(arr.len(), 2);
+        } else {
+            panic!("expected array, got {val:?}");
+        }
+    }
+
+    #[test]
+    fn coerce_bytes32_array_rejects_short_hex() {
+        // 62 hex chars = 31 bytes, which is invalid for bytes32
+        let hex = "0xdf02a603c991a0617e6daf13d208ef96890f7d59d3d8a3f73ae24234be6737";
+        let arg = format!("[{hex}]");
+        let result = coerce_value("bytes32[]", &arg);
+        assert!(result.is_err(), "Should reject short hex string for bytes32");
+    }
+
+    #[test]
+    fn coerce_bytes32_array_empty() {
+        let result = coerce_value("bytes32[]", "[]");
+        assert!(result.is_ok(), "Failed: {result:?}");
+        let val = result.unwrap();
+        if let DynSolValue::Array(arr) = val {
+            assert!(arr.is_empty());
+        } else {
+            panic!("expected array, got {val:?}");
+        }
     }
 }
