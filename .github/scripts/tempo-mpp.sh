@@ -4,7 +4,7 @@
 # Prerequisites:
 #   - Either `TEMPO_PRIVATE_KEY` is set, or Tempo wallet is configured: `tempo wallet login`
 #   - Wallet funded with TEMPO on moderato testnet
-#   - Foundry binaries built: `cargo build --bin cast --bin forge --bin anvil --bin chisel`
+#   - Foundry binaries built: `cargo build --bin swissledger-cast --bin swissledger-forge --bin swissledger-anvil --bin swissledger-chisel`
 #
 # Usage:
 #   ./scripts/mpp-test.sh [binary-dir]

@@ -58,10 +58,10 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=shared \
 RUN ln -s /app/target/debug /app/target/dev \
     && mkdir -p /app/output \
     && mv \
-    /app/target/${RUST_PROFILE}/forge \
-    /app/target/${RUST_PROFILE}/cast \
-    /app/target/${RUST_PROFILE}/anvil \
-    /app/target/${RUST_PROFILE}/chisel \
+    /app/target/${RUST_PROFILE}/swissledger-forge \
+    /app/target/${RUST_PROFILE}/swissledger-cast \
+    /app/target/${RUST_PROFILE}/swissledger-anvil \
+    /app/target/${RUST_PROFILE}/swissledger-chisel \
     /app/output/
 
 FROM ubuntu:22.04@sha256:eb29ed27b0821dca09c2e28b39135e185fc1302036427d5f4d70a41ce8fd7659 AS runtime

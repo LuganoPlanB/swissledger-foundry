@@ -456,12 +456,16 @@ impl TestProject {
     }
 
     pub(crate) fn forge_path(&self) -> PathBuf {
-        canonicalize(self.exe_root.join(format!("../forge{}", env::consts::EXE_SUFFIX)))
+        canonicalize(
+            self.exe_root.join(format!("../swissledger-forge{}", env::consts::EXE_SUFFIX)),
+        )
     }
 
     /// Returns the path to the cast executable.
     pub fn cast_bin(&self) -> Command {
-        let cast = canonicalize(self.exe_root.join(format!("../cast{}", env::consts::EXE_SUFFIX)));
+        let cast = canonicalize(
+            self.exe_root.join(format!("../swissledger-cast{}", env::consts::EXE_SUFFIX)),
+        );
         let mut cmd = Command::new(cast);
         // disable color output for comparisons
         cmd.env("NO_COLOR", "1");

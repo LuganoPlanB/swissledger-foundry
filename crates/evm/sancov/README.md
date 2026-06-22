@@ -43,6 +43,6 @@ fi
 Then build:
 
 ```bash
-RUSTC_WRAPPER=./sancov-wrapper.sh cargo build --profile fuzz --bin forge
+RUSTC_WRAPPER=./sancov-wrapper.sh cargo build --profile fuzz --bin swissledger-forge
 ```
 

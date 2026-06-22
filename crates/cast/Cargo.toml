@@ -17,7 +17,7 @@ workspace = true
 name = "cast"
 
 [[bin]]
-name = "cast"
+name = "swissledger-cast"
 path = "bin/main.rs"
 
 [dependencies]
