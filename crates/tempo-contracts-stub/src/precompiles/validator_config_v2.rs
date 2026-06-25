@@ -1,5 +1,3 @@
-use alloc::string::String;
-
 pub use IValidatorConfigV2::{
     IValidatorConfigV2Errors as ValidatorConfigV2Error,
     IValidatorConfigV2Events as ValidatorConfigV2Event,

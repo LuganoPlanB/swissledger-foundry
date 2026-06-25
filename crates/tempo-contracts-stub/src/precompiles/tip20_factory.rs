@@ -1,7 +1,6 @@
 pub use ITIP20Factory::{
     ITIP20FactoryErrors as TIP20FactoryError, ITIP20FactoryEvents as TIP20FactoryEvent,
 };
-use alloy_primitives::Address;
 
 crate::sol! {
   #[derive(Debug, PartialEq, Eq)]

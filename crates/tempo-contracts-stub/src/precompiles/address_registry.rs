@@ -1,7 +1,6 @@
 pub use IAddressRegistry::{
     IAddressRegistryErrors as AddrRegistryError, IAddressRegistryEvents as AddrRegistryEvent,
 };
-use alloy_primitives::Address;
 
 crate::sol! {
     /// [TIP-1022] virtual address registry interface.

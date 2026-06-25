@@ -156,7 +156,7 @@ impl WalletSigner {
         Ok(Self::Local(PrivateKeySigner::from_bytes(private_key)?))
     }
 
-    pub async fn available_senders(&self, max: usize) -> Result<Vec<Address>> {
+    pub async fn available_senders(&self, _max: usize) -> Result<Vec<Address>> {
         let mut senders = HashSet::new();
         match self {
             Self::Local(local) => {
