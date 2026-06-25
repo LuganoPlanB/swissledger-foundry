@@ -41,6 +41,7 @@ eth-keystore = "0.5.0"
 eyre = "0.6"
 rpassword = "7"
 serde = { version = "1.0", features = ["derive", "rc"] }
+serde_json = "1.0"
 tempo-primitives = { version = "1.6", features = ["std", "serde"], optional = true, default-features = false }
 thiserror = "2"
 toml = { version = "0.9", optional = true }
@@ -49,4 +50,3 @@ tracing = "0.1"
 [dev-dependencies]
 reqwest = { version = "0.13", features = ["rustls", "json"], default-features = false }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
-serde_json = "1.0"

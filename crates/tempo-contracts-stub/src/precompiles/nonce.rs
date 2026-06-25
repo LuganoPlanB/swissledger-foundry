@@ -7,7 +7,7 @@ crate::sol! {
     /// are handled directly by account state. Each account can have multiple
     /// independent nonce sequences identified by a nonce key.
     #[derive(Debug, PartialEq, Eq)]
-    
+
     interface INonce {
         /// Get the current nonce for a specific account and nonce key
         /// @param account The account address
@@ -30,37 +30,5 @@ crate::sol! {
         error ExpiringNonceSetFull();
         /// Returned when valid_before is not within the allowed window
         error InvalidExpiringNonceExpiry();
-    }
-}
-
-impl NonceError {
-    /// Creates an error for protocol nonce not supported
-    pub const fn protocol_nonce_not_supported() -> Self {
-        Self::ProtocolNonceNotSupported(INonce::ProtocolNonceNotSupported)
-    }
-
-    /// Creates an error for invalid nonce key
-    pub const fn invalid_nonce_key() -> Self {
-        Self::InvalidNonceKey(INonce::InvalidNonceKey)
-    }
-
-    /// Creates an error for when nonce overflows
-    pub const fn nonce_overflow() -> Self {
-        Self::NonceOverflow(INonce::NonceOverflow)
-    }
-
-    /// Creates an error for expiring nonce replay
-    pub const fn expiring_nonce_replay() -> Self {
-        Self::ExpiringNonceReplay(INonce::ExpiringNonceReplay)
-    }
-
-    /// Creates an error for expiring nonce set being full
-    pub const fn expiring_nonce_set_full() -> Self {
-        Self::ExpiringNonceSetFull(INonce::ExpiringNonceSetFull)
-    }
-
-    /// Creates an error for invalid expiring nonce expiry
-    pub const fn invalid_expiring_nonce_expiry() -> Self {
-        Self::InvalidExpiringNonceExpiry(INonce::InvalidExpiringNonceExpiry)
     }
 }

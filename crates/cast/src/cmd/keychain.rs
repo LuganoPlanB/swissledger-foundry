@@ -11,14 +11,12 @@ use foundry_cli::{
     opts::{RpcOpts, TransactionOpts},
     utils::LoadConfig,
 };
-use foundry_common::{
-    provider::ProviderBuilder,
-    shell,
-    tempo::{self, KeyType, KeysFile, WalletType, read_tempo_keys_file, tempo_keys_path},
-};
+use foundry_common::{provider::ProviderBuilder, shell};
 use foundry_evm::hardfork::TempoHardfork;
+use foundry_wallets::{
+    KeyType, KeysFile, WalletType, read_tempo_keys_file, tempo, tempo_keys_path,
+};
 use tempo_alloy::{TempoNetwork, provider::TempoProviderExt};
-#[cfg(feature = "tempo-contracts")]
 use tempo_contracts::precompiles::{
     ACCOUNT_KEYCHAIN_ADDRESS, IAccountKeychain,
     IAccountKeychain::{
@@ -765,8 +763,8 @@ fn format_expiry(expiry: u64) -> String {
 
 fn load_keys_file() -> Result<KeysFile> {
     match read_tempo_keys_file() {
-        Some(f) => Ok(f),
-        None => {
+        Ok(f) => Ok(f),
+        Err(_) => {
             let path = tempo_keys_path()
                 .map(|p| p.display().to_string())
                 .unwrap_or_else(|| "(unknown)".to_string());

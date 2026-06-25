@@ -17,6 +17,34 @@ pub const PERMIT2_SALT: B256 =
 pub const ARACHNID_CREATE2_FACTORY_ADDRESS: Address =
     address!("0x4e59b44847b379578588920cA78FbF26c0B4956C");
 
+/// Stub binding for the Multicall3 deployment bytecode.
+pub struct Multicall3;
+
+impl Multicall3 {
+    pub const DEPLOYED_BYTECODE: &'static [u8] = &[];
+}
+
+/// Stub binding for the CreateX deployment bytecode.
+pub struct CreateX;
+
+impl CreateX {
+    pub const DEPLOYED_BYTECODE: &'static [u8] = &[];
+}
+
+/// Stub binding for the SafeDeployer deployment bytecode.
+pub struct SafeDeployer;
+
+impl SafeDeployer {
+    pub const DEPLOYED_BYTECODE: &'static [u8] = &[];
+}
+
+/// Stub binding for the Permit2 deployment bytecode.
+pub struct Permit2;
+
+impl Permit2 {
+    pub const DEPLOYED_BYTECODE: &'static [u8] = &[];
+}
+
 macro_rules! sol {
     ($($input:tt)*) => {
         #[cfg(all(feature = "rpc", feature = "serde"))]

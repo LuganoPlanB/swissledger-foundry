@@ -4,7 +4,7 @@ pub use ITIP403Registry::{
 
 crate::sol! {
     #[derive(Debug, PartialEq, Eq)]
-    
+
     interface ITIP403Registry {
         // Enums
         enum PolicyType {
@@ -62,36 +62,5 @@ impl ITIP403Registry::PolicyType {
     /// Returns `true` if this is a compound policy.
     pub const fn is_compound(&self) -> bool {
         matches!(self, Self::COMPOUND)
-    }
-}
-
-impl TIP403RegistryError {
-    /// Creates an error for unauthorized calls
-    pub const fn unauthorized() -> Self {
-        Self::Unauthorized(ITIP403Registry::Unauthorized {})
-    }
-
-    /// Creates an error for incompatible policy types
-    pub const fn invalid_policy_type() -> Self {
-        Self::InvalidPolicyType(ITIP403Registry::InvalidPolicyType {})
-    }
-
-    /// Creates an error for incompatible policy types
-    pub const fn incompatible_policy_type() -> Self {
-        Self::IncompatiblePolicyType(ITIP403Registry::IncompatiblePolicyType {})
-    }
-
-    /// Creates an error for non-existent policy
-    pub const fn policy_not_found() -> Self {
-        Self::PolicyNotFound(ITIP403Registry::PolicyNotFound {})
-    }
-
-    pub const fn policy_not_simple() -> Self {
-        Self::PolicyNotSimple(ITIP403Registry::PolicyNotSimple {})
-    }
-
-    /// Virtual addresses are TIP-1022 forwarding aliases and cannot be used as policy members.
-    pub const fn virtual_address_not_allowed() -> Self {
-        Self::VirtualAddressNotAllowed(ITIP403Registry::VirtualAddressNotAllowed {})
     }
 }

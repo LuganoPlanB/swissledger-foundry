@@ -1,7 +1,10 @@
 use crate::{
+    BrowserWalletOpts,
     signer::{PendingSigner, WalletSigner},
     utils,
+    wallet_browser::signer::BrowserSigner,
 };
+use alloy_network::Network;
 use alloy_primitives::map::AddressHashMap;
 use alloy_signer::Signer;
 use clap::Parser;
@@ -98,6 +101,11 @@ pub struct MultiWalletOpts {
     /// Open an interactive prompt to enter your private key.
     #[arg(long, short, help_heading = "Wallet options - raw", conflicts_with = "interactives")]
     pub interactive: bool,
+
+    /// Browser wallets are unsupported in the SwissLedger slim wallet crate.
+    #[command(flatten)]
+    #[builder(default)]
+    pub browser: BrowserWalletOpts,
 
     /// Use the provided private keys.
     #[arg(long, help_heading = "Wallet options - raw", value_name = "RAW_PRIVATE_KEYS")]
@@ -228,10 +236,13 @@ pub struct MultiWalletOpts {
     /// See: <https://docs.turnkey.com/getting-started/quickstart>
     #[arg(long, help_heading = "Wallet options - remote", hide = !cfg!(feature = "turnkey"))]
     pub turnkey: bool,
-
 }
 
 impl MultiWalletOpts {
+    pub async fn browser_signer<N: Network>(&self) -> Result<Option<BrowserSigner<N>>> {
+        self.browser.run::<N>().await
+    }
+
     /// Returns [MultiWallet] container configured with provided options.
     pub async fn get_multi_wallet(&self) -> Result<MultiWallet> {
         let mut pending = Vec::new();
@@ -490,7 +501,6 @@ impl MultiWalletOpts {
 
         None
     }
-
 }
 
 #[cfg(test)]

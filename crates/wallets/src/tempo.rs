@@ -9,7 +9,7 @@ use crate::{WalletSigner, utils};
 /// Wallet type: how this wallet was created.
 #[derive(Clone, Copy, Default, serde::Deserialize)]
 #[serde(rename_all = "lowercase")]
-enum WalletType {
+pub enum WalletType {
     #[default]
     Local,
     Passkey,
@@ -18,7 +18,7 @@ enum WalletType {
 /// Cryptographic key type.
 #[derive(Clone, Copy, Default, serde::Deserialize)]
 #[serde(rename_all = "lowercase")]
-enum KeyType {
+pub enum KeyType {
     #[default]
     Secp256k1,
     P256,
@@ -28,41 +28,48 @@ enum KeyType {
 /// A single entry from Tempo's `keys.toml`.
 #[derive(serde::Deserialize)]
 #[allow(dead_code)]
-struct KeyEntry {
+pub struct KeyEntry {
     #[serde(default)]
-    wallet_type: WalletType,
+    pub wallet_type: WalletType,
     #[serde(default)]
-    wallet_address: Address,
+    pub wallet_address: Address,
     #[serde(default)]
-    chain_id: u64,
+    pub chain_id: u64,
     #[serde(default)]
-    key_type: KeyType,
+    pub key_type: KeyType,
     #[serde(default)]
-    key_address: Option<Address>,
+    pub key_address: Option<Address>,
     #[serde(default)]
-    key: Option<String>,
+    pub key: Option<String>,
     #[serde(default)]
-    key_authorization: Option<String>,
+    pub key_authorization: Option<String>,
     #[serde(default)]
-    expiry: Option<u64>,
+    pub expiry: Option<u64>,
     #[serde(default)]
-    limits: Vec<StoredTokenLimit>,
+    pub limits: Vec<StoredTokenLimit>,
+}
+
+impl KeyEntry {
+    /// Returns whether this key entry stores an inline private key.
+    pub fn has_inline_key(&self) -> bool {
+        self.key.is_some()
+    }
 }
 
 /// Per-token spending limit stored in `keys.toml`.
 #[derive(serde::Deserialize)]
-struct StoredTokenLimit {
+pub struct StoredTokenLimit {
     #[allow(dead_code)]
-    currency: Address,
+    pub currency: Address,
     #[allow(dead_code)]
-    limit: String,
+    pub limit: String,
 }
 
 /// The top-level structure of `~/.tempo/wallet/keys.toml`.
 #[derive(serde::Deserialize)]
-struct KeysFile {
+pub struct KeysFile {
     #[serde(default)]
-    keys: Vec<KeyEntry>,
+    pub keys: Vec<KeyEntry>,
 }
 
 /// Configuration for a Tempo access key (keychain mode).
@@ -96,7 +103,7 @@ pub enum TempoLookup {
 /// Returns the path to Tempo's keys file.
 ///
 /// Respects `TEMPO_HOME` env var, defaulting to `~/.tempo`.
-fn keys_path() -> Option<PathBuf> {
+pub fn tempo_keys_path() -> Option<PathBuf> {
     let base = std::env::var_os("TEMPO_HOME")
         .map(PathBuf::from)
         .or_else(|| dirs::home_dir().map(|h| h.join(".tempo")))?;
@@ -116,7 +123,7 @@ fn decode_key_authorization(hex_str: &str) -> Result<SignedKeyAuthorization> {
 /// [`TempoLookup::Keychain`] if a keychain-mode access key is found,
 /// or [`TempoLookup::NotFound`] if no entry matches.
 pub fn lookup_signer(from: Address) -> Result<TempoLookup> {
-    let path = match keys_path() {
+    let path = match tempo_keys_path() {
         Some(p) if p.is_file() => p,
         _ => return Ok(TempoLookup::NotFound),
     };
@@ -157,4 +164,11 @@ pub fn lookup_signer(from: Address) -> Result<TempoLookup> {
     }
 
     Ok(TempoLookup::NotFound)
+}
+
+/// Reads Tempo's `keys.toml` file.
+pub fn read_tempo_keys_file() -> Result<KeysFile> {
+    let path = tempo_keys_path().ok_or_else(|| eyre::eyre!("could not determine Tempo home"))?;
+    let contents = std::fs::read_to_string(&path)?;
+    Ok(toml::from_str(&contents)?)
 }

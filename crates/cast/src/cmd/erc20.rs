@@ -29,7 +29,6 @@ use foundry_common::{
 pub use foundry_config::{Chain, utils::*};
 use foundry_wallets::{TempoAccessKeyConfig, WalletSigner};
 use tempo_alloy::TempoNetwork;
-#[cfg(feature = "tempo-contracts")]
 use tempo_contracts::precompiles::PATH_USD_ADDRESS;
 
 sol! {

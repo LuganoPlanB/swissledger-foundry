@@ -11,7 +11,6 @@ use alloy_sol_types::sol;
 use foundry_cli::utils::{LoadConfig, get_chain};
 use foundry_common::provider::ProviderBuilder;
 use tempo_alloy::TempoNetwork;
-#[cfg(feature = "tempo-contracts")]
 use tempo_contracts::precompiles::{TIP20_FACTORY_ADDRESS, is_iso4217_currency};
 
 sol! {

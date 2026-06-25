@@ -111,7 +111,7 @@ chrono.workspace = true
 ctrlc = { version = "3", optional = true }
 fdlimit = { version = "0.3", optional = true }
 
-tempo-alloy = { workspace = true, optional = true }
+tempo-alloy.workspace = true
 [dev-dependencies]
 alloy-provider = { workspace = true, features = ["txpool-api"] }
 alloy-pubsub.workspace = true

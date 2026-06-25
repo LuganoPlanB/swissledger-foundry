@@ -15,15 +15,18 @@ pub mod signer;
 #[cfg(feature = "tempo")]
 pub mod tempo;
 pub mod utils;
+pub mod wallet_browser;
 pub mod wallet_multi;
 pub mod wallet_raw;
 
 pub use channel_db::{Channel, ChannelDb};
 pub use error::StoreError;
-pub use opts::{MaybeTempoConfig, WalletOpts};
+pub use opts::{BrowserWalletOpts, MaybeTempoConfig, WalletOpts};
 pub use signer::{PendingSigner, WalletSigner};
 #[cfg(feature = "tempo")]
-pub use tempo::TempoAccessKeyConfig;
+pub use tempo::{
+    KeyType, KeysFile, TempoAccessKeyConfig, WalletType, read_tempo_keys_file, tempo_keys_path,
+};
 pub use wallet_multi::MultiWalletOpts;
 pub use wallet_raw::RawWalletOpts;
 

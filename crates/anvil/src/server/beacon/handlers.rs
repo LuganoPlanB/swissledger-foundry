@@ -13,7 +13,6 @@ use axum::{
     http::HeaderMap,
     response::{IntoResponse, Response},
 };
-use ssz::Encode;
 use std::{collections::HashMap, str::FromStr as _};
 
 /// Handles incoming Beacon API requests for blob sidecars
@@ -74,7 +73,11 @@ pub async fn handle_get_blobs<N: Network>(
     match api.anvil_get_blobs_by_block_id(block_id, versioned_hashes) {
         Ok(Some(blobs)) => {
             if must_be_ssz(&headers) {
-                blobs.as_ssz_bytes().into_response()
+                BeaconError::new(
+                    super::error::BeaconErrorCode::BadRequest,
+                    "SSZ beacon blob responses are not supported in the SwissLedger slim build",
+                )
+                .into_response()
             } else {
                 Json(GetBlobsResponse {
                     execution_optimistic: false,
