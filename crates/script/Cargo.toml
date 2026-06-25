@@ -57,8 +57,11 @@ alloy-eips.workspace = true
 alloy-consensus.workspace = true
 thiserror.workspace = true
 
-tempo-alloy = { workspace = true, optional = true }
+tempo-alloy.workspace = true
 tempo-primitives.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
+
+[features]
+debugger = ["dep:foundry-debugger"]

@@ -26,14 +26,10 @@ use foundry_evm_core::{
 use itertools::Itertools;
 use revm_inspectors::tracing::types::{DecodedCallLog, DecodedCallTrace};
 use std::{collections::BTreeMap, sync::OnceLock};
-#[cfg(feature = "tempo-contracts")]
-use tempo_contracts::precompiles::{
-    IAccountKeychain, IFeeManager, IStablecoinDEX, ITIP20Factory, ITIP403Registry, IValidatorConfig,
-};
 use tempo_precompiles::{
     ACCOUNT_KEYCHAIN_ADDRESS, NONCE_PRECOMPILE_ADDRESS, PATH_USD_ADDRESS, STABLECOIN_DEX_ADDRESS,
     TIP_FEE_MANAGER_ADDRESS, TIP20_FACTORY_ADDRESS, TIP403_REGISTRY_ADDRESS,
-    VALIDATOR_CONFIG_ADDRESS, nonce::INonce, tip20::ITIP20,
+    VALIDATOR_CONFIG_ADDRESS,
 };
 
 mod precompiles;
@@ -228,29 +224,11 @@ impl CallTraceDecoder {
             functions: console::hh::abi::functions()
                 .into_values()
                 .chain(Vm::abi::functions().into_values())
-                // Tempo
-                .chain(IFeeManager::abi::functions().into_values())
-                .chain(ITIP20::abi::functions().into_values())
-                .chain(ITIP403Registry::abi::functions().into_values())
-                .chain(ITIP20Factory::abi::functions().into_values())
-                .chain(IStablecoinDEX::abi::functions().into_values())
-                .chain(INonce::abi::functions().into_values())
-                .chain(IValidatorConfig::abi::functions().into_values())
-                .chain(IAccountKeychain::abi::functions().into_values())
                 .flatten()
                 .map(|func| (func.selector(), vec![func]))
                 .collect(),
             events: console::ds::abi::events()
                 .into_values()
-                // Tempo
-                .chain(IFeeManager::abi::events().into_values())
-                .chain(ITIP20::abi::events().into_values())
-                .chain(ITIP403Registry::abi::events().into_values())
-                .chain(ITIP20Factory::abi::events().into_values())
-                .chain(IStablecoinDEX::abi::events().into_values())
-                .chain(INonce::abi::events().into_values())
-                .chain(IValidatorConfig::abi::events().into_values())
-                .chain(IAccountKeychain::abi::events().into_values())
                 .flatten()
                 .map(|event| ((event.selector(), indexed_inputs(&event)), vec![event]))
                 .collect(),

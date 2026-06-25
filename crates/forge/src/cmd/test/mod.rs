@@ -38,6 +38,7 @@ use foundry_config::{
     },
     filter::GlobMatcher,
 };
+#[cfg(feature = "debugger")]
 use foundry_debugger::Debugger;
 use foundry_evm::{
     core::evm::{
@@ -318,6 +319,11 @@ impl TestArgs {
 
         // Create test options from general project settings and compiler output.
         let should_debug = self.debug;
+        #[cfg(not(feature = "debugger"))]
+        if should_debug {
+            bail!("forge test --debug requires the 'debugger' feature");
+        }
+
         let should_draw = self.flamegraph || self.flamechart;
 
         // Determine executor verbosity.
@@ -377,6 +383,8 @@ impl TestArgs {
             )
             .await?
         };
+        #[cfg(not(feature = "debugger"))]
+        let _ = (project_root, &libraries);
 
         if should_draw {
             let (suite_name, test_name, mut test_result) =
@@ -419,6 +427,7 @@ impl TestArgs {
             }
         }
 
+        #[cfg(feature = "debugger")]
         if should_debug {
             // Get first non-empty suite result. We will have only one such entry.
             let (_, _, test_result) =

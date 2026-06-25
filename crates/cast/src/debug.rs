@@ -5,6 +5,7 @@ use alloy_primitives::{Address, Bytes, map::HashMap};
 use foundry_cli::utils::{TraceResult, print_traces};
 use foundry_common::{ContractsByArtifact, compile::ProjectCompiler, shell};
 use foundry_config::Config;
+#[cfg(feature = "debugger")]
 use foundry_debugger::Debugger;
 use foundry_evm::traces::{
     CallTraceDecoderBuilder, DebugTraceIdentifier,
@@ -76,13 +77,19 @@ pub(crate) async fn handle_traces(
         }
 
         if debug {
-            let mut debugger = Debugger::builder()
-                .traces(result.traces.expect("missing traces"))
-                .decoder(&decoder)
-                .sources(sources)
-                .build();
-            debugger.try_run_tui()?;
-            return Ok(());
+            #[cfg(not(feature = "debugger"))]
+            eyre::bail!("cast --debug requires the `debugger` feature");
+
+            #[cfg(feature = "debugger")]
+            {
+                let mut debugger = Debugger::builder()
+                    .traces(result.traces.expect("missing traces"))
+                    .decoder(&decoder)
+                    .sources(sources)
+                    .build();
+                debugger.try_run_tui()?;
+                return Ok(());
+            }
         }
 
         decoder.debug_identifier = Some(DebugTraceIdentifier::new(sources));

@@ -2,7 +2,7 @@ pub use ISignatureVerifier::ISignatureVerifierErrors as SignatureVerifierError;
 
 crate::sol! {
     #[derive(Debug, PartialEq, Eq)]
-    
+
     interface ISignatureVerifier {
 
         /// @notice Recovers the signer of a Tempo signature (secp256k1, P256, WebAuthn).
@@ -20,15 +20,5 @@ crate::sol! {
 
         error InvalidFormat();
         error InvalidSignature();
-    }
-}
-
-impl SignatureVerifierError {
-    pub const fn invalid_format() -> Self {
-        Self::InvalidFormat(ISignatureVerifier::InvalidFormat {})
-    }
-
-    pub const fn invalid_signature() -> Self {
-        Self::InvalidSignature(ISignatureVerifier::InvalidSignature {})
     }
 }

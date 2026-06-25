@@ -228,7 +228,7 @@ impl RuntimeTransport {
     /// Connects to an HTTP transport.
     fn connect_http(&self) -> Result<InnerTransport, RuntimeTransportError> {
         let client = self.reqwest_client()?;
-        Ok(InnerTransport::Http(Http::new(client, self.url.clone())))
+        Ok(InnerTransport::Http(Http::with_client(client, self.url.clone())))
     }
 
     /// Connects to a WS transport.

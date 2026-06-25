@@ -75,7 +75,8 @@ pub async fn run_command(args: Chisel) -> Result<()> {
     // REPL loop.
     let mut interrupt = false;
     loop {
-        match rl.readline(&dispatcher.get_prompt()) {
+        let prompt = dispatcher.get_prompt();
+        match rl.readline(prompt.as_ref()) {
             Ok(line) => {
                 debug!("dispatching next line: {line}");
                 // Clear interrupt flag.

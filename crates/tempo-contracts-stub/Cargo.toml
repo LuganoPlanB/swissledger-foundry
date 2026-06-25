@@ -9,11 +9,13 @@ description = "Tempo contracts stub (SwissLedger fork)"
 path = "src/lib.rs"
 
 [dependencies]
+alloy-contract.workspace = true
 alloy-primitives = { version = "1.5.2", features = ["serde"] }
 alloy-sol-types = "1.5.2"
 serde = { version = "1.0", features = ["derive"], optional = true }
 
 [features]
-default = ["serde"]
+default = ["std", "serde"]
 rpc = []
 serde = ["dep:serde"]
+std = []

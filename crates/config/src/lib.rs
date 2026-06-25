@@ -1862,6 +1862,7 @@ impl Config {
             ]),
             search_paths: None,
             experimental_codegen: self.vyper.experimental_codegen,
+            ..Default::default()
         })
     }
 

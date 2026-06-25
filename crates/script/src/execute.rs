@@ -22,6 +22,7 @@ use foundry_common::{
     provider::ProviderBuilder,
 };
 use foundry_config::NamedChain;
+#[cfg(feature = "debugger")]
 use foundry_debugger::Debugger;
 use foundry_evm::{
     core::evm::FoundryEvmNetwork,
@@ -522,15 +523,32 @@ impl<FEN: FoundryEvmNetwork> PreSimulationState<FEN> {
     }
 
     pub fn run_debugger(self) -> Result<()> {
-        self.create_debugger().try_run_tui()?;
-        Ok(())
+        #[cfg(not(feature = "debugger"))]
+        {
+            let _ = self;
+            eyre::bail!("script debugging requires the `debugger` feature")
+        }
+        #[cfg(feature = "debugger")]
+        {
+            self.create_debugger().try_run_tui()?;
+            Ok(())
+        }
     }
 
     pub fn dump_debugger(self, path: &Path) -> Result<()> {
-        self.create_debugger().dump_to_file(path)?;
-        Ok(())
+        #[cfg(not(feature = "debugger"))]
+        {
+            let _ = (self, path);
+            eyre::bail!("script debugger dumps require the `debugger` feature")
+        }
+        #[cfg(feature = "debugger")]
+        {
+            self.create_debugger().dump_to_file(path)?;
+            Ok(())
+        }
     }
 
+    #[cfg(feature = "debugger")]
     fn create_debugger(self) -> Debugger {
         Debugger::builder()
             .traces(

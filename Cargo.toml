@@ -28,6 +28,8 @@ members = [
     "crates/script-sequence/",
     "crates/test-utils/",
     "crates/tempo-contracts-stub/",
+    "crates/tempo-precompiles/",
+    "crates/tempo-precompiles-macros/",
     "crates/wallets/",
     "crates/cli-markdown/",
 ]
@@ -345,7 +347,7 @@ foundry-primitives = { path = "crates/primitives" }
 
 # solc & compilation utilities
 foundry-block-explorers = { version = "0.24.0", default-features = false }
-foundry-compilers = { version = "0.20.0", default-features = false, features = [
+foundry-compilers = { version = "0.21.0", default-features = false, features = [
     "rustls",
     "svm-solc",
 ] }
@@ -357,6 +359,7 @@ svm = { package = "svm-rs", version = "0.5", default-features = false, features 
 ] }
 
 ## alloy
+alloy = { version = "2.0.1", default-features = false }
 alloy-consensus = { version = "2.0.1", default-features = false }
 alloy-contract = { version = "2.0.1", default-features = false }
 alloy-eips = { version = "2.0.1", default-features = false }
@@ -408,6 +411,10 @@ op-alloy-flz = "0.13.1"
 ## alloy-evm
 alloy-evm = "0.33.2"
 alloy-op-evm = "0.31.0"
+
+## commonware
+commonware-codec = "2026.5.0"
+commonware-cryptography = "2026.5.0"
 
 # revm
 revm = { version = "38.0.0", default-features = false }
@@ -514,7 +521,8 @@ tempo-revm = { git = "https://github.com/tempoxyz/tempo", rev = "1e5a82dff207e2c
     "serde",
 ] }
 tempo-contracts = { path = "crates/tempo-contracts-stub" }
-tempo-precompiles = { git = "https://github.com/tempoxyz/tempo", rev = "1e5a82dff207e2cbd6cecdcfb8ff3cd2e39baa69" }
+tempo-precompiles = { path = "crates/tempo-precompiles" }
+tempo-precompiles-macros = { path = "crates/tempo-precompiles-macros" }
 
 ## Pinned dependencies. Enabled for the workspace in crates/test-utils.
 
@@ -605,6 +613,11 @@ solar = { package = "solar-compiler", git = "https://github.com/paradigmxyz/sola
 solar-interface = { package = "solar-interface", git = "https://github.com/paradigmxyz/solar", rev = "530f129" }
 solar-ast = { package = "solar-ast", git = "https://github.com/paradigmxyz/solar", rev = "530f129" }
 solar-sema = { package = "solar-sema", git = "https://github.com/paradigmxyz/solar", rev = "530f129" }
+
+[patch."https://github.com/tempoxyz/tempo"]
+tempo-contracts = { path = "crates/tempo-contracts-stub" }
+tempo-precompiles = { path = "crates/tempo-precompiles" }
+tempo-precompiles-macros = { path = "crates/tempo-precompiles-macros" }
 
 [workspace.metadata.cargo-shear]
 ignored = ["idna_adapter", "cast", "chisel", "forge", "alloy-contract"]

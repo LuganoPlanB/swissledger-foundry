@@ -5,7 +5,6 @@
 //! execution helpers.
 
 use eyre::Result;
-use forge_doc::solang_ext::{CodeLocationExt, SafeUnwrap};
 use foundry_common::fs;
 use foundry_compilers::{
     Artifact, ProjectCompileOutput,
@@ -17,9 +16,11 @@ use foundry_config::{Config, SolcReq};
 use foundry_evm::{backend::Backend, core::bytecode::InstIter, opts::EvmOpts};
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use solang_parser::helpers::CodeLocation;
 use solang_parser::pt;
 use solar::interface::diagnostics::EmittedDiagnostics;
 use std::{cell::OnceCell, collections::HashMap, fmt, path::PathBuf};
+
 use walkdir::WalkDir;
 
 /// The minimum Solidity version of the `Vm` interface.
@@ -789,20 +790,42 @@ contract {contract_name} {{
                                 }
                             }
                             pt::ContractPart::EventDefinition(def) => {
-                                let event_name = def.name.safe_unwrap().name.clone();
+                                let event_name = def
+                                    .name
+                                    .as_ref()
+                                    .expect("parser node should contain a name")
+                                    .name
+                                    .clone();
                                 intermediate.event_definitions.insert(event_name, def);
                             }
                             pt::ContractPart::StructDefinition(def) => {
-                                let struct_name = def.name.safe_unwrap().name.clone();
+                                let struct_name = def
+                                    .name
+                                    .as_ref()
+                                    .expect("parser node should contain a name")
+                                    .name
+                                    .clone();
                                 intermediate.struct_definitions.insert(struct_name, def);
                             }
                             pt::ContractPart::VariableDefinition(def) => {
-                                let var_name = def.name.safe_unwrap().name.clone();
+                                let var_name = def
+                                    .name
+                                    .as_ref()
+                                    .expect("parser node should contain a name")
+                                    .name
+                                    .clone();
                                 intermediate.variable_definitions.insert(var_name, def);
                             }
                             _ => {}
                         });
-                        Some((cd.name.safe_unwrap().name.clone(), intermediate))
+                        Some((
+                            cd.name
+                                .as_ref()
+                                .expect("parser node should contain a name")
+                                .name
+                                .clone(),
+                            intermediate,
+                        ))
                     }
                     _ => None,
                 })
@@ -823,7 +846,10 @@ contract {contract_name} {{
     pub fn get_statement_definitions(statement: &pt::Statement) -> Vec<(String, pt::Expression)> {
         match statement {
             pt::Statement::VariableDefinition(_, def, _) => {
-                vec![(def.name.safe_unwrap().name.clone(), def.ty.clone())]
+                vec![(
+                    def.name.as_ref().expect("parser node should contain a name").name.clone(),
+                    def.ty.clone(),
+                )]
             }
             pt::Statement::Expression(_, pt::Expression::Assign(_, left, _)) => {
                 if let pt::Expression::List(_, list) = left.as_ref() {

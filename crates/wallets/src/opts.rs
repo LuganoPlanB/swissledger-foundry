@@ -1,6 +1,9 @@
 #[cfg(feature = "tempo")]
 use crate::tempo::TempoAccessKeyConfig;
-use crate::{signer::WalletSigner, utils, wallet_raw::RawWalletOpts};
+use crate::{
+    signer::WalletSigner, utils, wallet_browser::signer::BrowserSigner, wallet_raw::RawWalletOpts,
+};
+use alloy_network::Network;
 use alloy_primitives::Address;
 #[cfg(feature = "tempo")]
 use alloy_signer::Signer;
@@ -14,6 +17,20 @@ use serde::Serialize;
 pub type MaybeTempoConfig = TempoAccessKeyConfig;
 #[cfg(not(feature = "tempo"))]
 pub type MaybeTempoConfig = ();
+
+/// Browser wallet options are unsupported in the SwissLedger slim wallet crate.
+#[derive(Clone, Debug, Default, Serialize, Parser)]
+pub struct BrowserWalletOpts {
+    #[arg(long, help_heading = "Wallet options - browser", hide = true)]
+    pub browser: bool,
+}
+
+impl BrowserWalletOpts {
+    /// Returns no browser signer in the SwissLedger slim wallet crate.
+    pub async fn run<N: Network>(&self) -> Result<Option<BrowserSigner<N>>> {
+        Ok(None)
+    }
+}
 
 /// The wallet options can either be:
 /// 1. Raw (via private key / mnemonic file, see `RawWallet`)

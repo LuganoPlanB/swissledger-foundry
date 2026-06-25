@@ -140,7 +140,6 @@ use std::{
 };
 use storage::{Blockchain, DEFAULT_HISTORY_LIMIT, MinedTransaction};
 use tempo_chainspec::hardfork::TempoHardfork;
-#[cfg(feature = "tempo-evm")]
 use tempo_evm::evm::TempoEvmFactory;
 use tempo_precompiles::{
     storage::StorageCtx,

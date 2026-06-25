@@ -15,7 +15,7 @@ crate::sol! {
     /// - Slots 0-3: TIPFeeAMM storage (pools, pool exists, liquidity data)
     /// - Slots 4+: FeeManager-specific storage (validator tokens, user tokens, collected fees, etc.)
     #[derive(Debug, PartialEq, Eq)]
-    
+
     interface IFeeManager {
         // Structs
         struct FeeInfo {
@@ -55,7 +55,7 @@ sol! {
     /// When FeeManager is deployed, it effectively "is" a TIPFeeAMM with additional fee management
     /// capabilities layered on top. Both contracts operate on the same storage slots.
     #[derive(Debug, PartialEq, Eq)]
-    
+
     #[allow(clippy::too_many_arguments)]
     interface ITIPFeeAMM {
         // Structs
@@ -105,58 +105,5 @@ sol! {
         error InvalidAmount();
         error DivisionByZero();
         error InvalidSwapCalculation();
-    }
-}
-
-impl FeeManagerError {
-    /// Creates an error for invalid token.
-    pub const fn invalid_token() -> Self {
-        Self::InvalidToken(IFeeManager::InvalidToken {})
-    }
-
-    /// Creates an error for insufficient fee token balance.
-    pub const fn insufficient_fee_token_balance() -> Self {
-        Self::InsufficientFeeTokenBalance(IFeeManager::InsufficientFeeTokenBalance {})
-    }
-
-    /// Creates an error for cannot change within block.
-    pub const fn cannot_change_within_block() -> Self {
-        Self::CannotChangeWithinBlock(IFeeManager::CannotChangeWithinBlock {})
-    }
-}
-
-impl TIPFeeAMMError {
-    /// Creates an error for identical token addresses.
-    pub const fn identical_addresses() -> Self {
-        Self::IdenticalAddresses(ITIPFeeAMM::IdenticalAddresses {})
-    }
-
-    /// Creates an error for invalid token.
-    pub const fn invalid_token() -> Self {
-        Self::InvalidToken(ITIPFeeAMM::InvalidToken {})
-    }
-
-    /// Creates an error for insufficient liquidity.
-    pub const fn insufficient_liquidity() -> Self {
-        Self::InsufficientLiquidity(ITIPFeeAMM::InsufficientLiquidity {})
-    }
-
-    /// Creates an error for insufficient reserves.
-    pub const fn insufficient_reserves() -> Self {
-        Self::InsufficientReserves(ITIPFeeAMM::InsufficientReserves {})
-    }
-    /// Creates an error for invalid amount.
-    pub const fn invalid_amount() -> Self {
-        Self::InvalidAmount(ITIPFeeAMM::InvalidAmount {})
-    }
-
-    /// Creates an error for invalid swap calculation.
-    pub const fn invalid_swap_calculation() -> Self {
-        Self::InvalidSwapCalculation(ITIPFeeAMM::InvalidSwapCalculation {})
-    }
-
-    /// Creates an error for division by zero.
-    pub const fn division_by_zero() -> Self {
-        Self::DivisionByZero(ITIPFeeAMM::DivisionByZero {})
     }
 }

@@ -7,7 +7,6 @@
 
 use alloy_primitives::{Address, Bytes, U256, address};
 use revm::state::Bytecode;
-#[cfg(feature = "tempo-contracts")]
 use tempo_contracts::{
     ARACHNID_CREATE2_FACTORY_ADDRESS, CREATEX_ADDRESS, CreateX, MULTICALL3_ADDRESS, Multicall3,
     PERMIT2_ADDRESS, Permit2, SAFE_DEPLOYER_ADDRESS, SafeDeployer,
@@ -27,7 +26,6 @@ use tempo_precompiles::{
     validator_config,
 };
 
-#[cfg(feature = "tempo-contracts")]
 pub use tempo_contracts::precompiles::PATH_USD_ADDRESS;
 
 /// All well-known Tempo precompile addresses.
