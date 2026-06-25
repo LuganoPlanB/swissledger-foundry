@@ -39,9 +39,6 @@ jobs:
     needs: semver
     if: needs.semver.outputs.bump != 'none'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        binary: [swissledger-forge, swissledger-cast, swissledger-anvil, swissledger-chisel]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -59,21 +56,40 @@ jobs:
             sudo ln -sf /usr/include/$dir /usr/include/x86_64-linux-musl/$dir
           done
 
-      - name: Build static binary (${{ matrix.binary }})
+      - name: Build all static binaries
         run: |
-          PKG_CONFIG_ALLOW_CROSS=1 \
-          CC_x86_64_unknown_linux_musl=musl-gcc \
-          cargo build \
-            --profile dist \
-            --target x86_64-unknown-linux-musl \
-            --features "asm-keccak cli" \
-            --bin ${{ matrix.binary }}
+          export PKG_CONFIG_ALLOW_CROSS=1
+          export CC_x86_64_unknown_linux_musl=musl-gcc
+          TARGET="x86_64-unknown-linux-musl"
+          for bin in swissledger-forge swissledger-cast swissledger-anvil swissledger-chisel; do
+            echo "::group::Building $bin"
+            cargo build --profile dist --target "$TARGET" --features "asm-keccak cli" --bin "$bin"
+            echo "::endgroup::"
+          done
 
-      - name: Upload artifact
+      - name: Upload forge
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ matrix.binary }}
-          path: target/x86_64-unknown-linux-musl/dist/${{ matrix.binary }}
+          name: swissledger-forge
+          path: target/x86_64-unknown-linux-musl/dist/swissledger-forge
+
+      - name: Upload cast
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: swissledger-cast
+          path: target/x86_64-unknown-linux-musl/dist/swissledger-cast
+
+      - name: Upload anvil
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: swissledger-anvil
+          path: target/x86_64-unknown-linux-musl/dist/swissledger-anvil
+
+      - name: Upload chisel
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: swissledger-chisel
+          path: target/x86_64-unknown-linux-musl/dist/swissledger-chisel
 
   release:
     needs: [semver, build]
