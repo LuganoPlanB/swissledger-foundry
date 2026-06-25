@@ -7,6 +7,7 @@
 extern crate alloc;
 
 use alloy_primitives::{Address, B256, address, b256};
+use alloy_contract as _;
 
 pub const MULTICALL3_ADDRESS: Address = address!("0xcA11bde05977b3631167028862bE2a173976CA11");
 pub const CREATEX_ADDRESS: Address = address!("0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed");
