@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sha = env_var("VERGEN_GIT_SHA");
     let sha_short = &sha[..10];
 
-    let tag_name = try_env_var("TAG_NAME").unwrap_or_else(|| String::from("dev"));
+    let tag_name = try_env_var("TAG_NAME").unwrap_or_else(|| String::from("swissledger"));
     let version = release_version(&env_var("CARGO_PKG_VERSION"), &tag_name);
     let is_nightly = tag_name.starts_with("nightly");
 

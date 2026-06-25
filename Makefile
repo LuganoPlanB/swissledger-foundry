@@ -57,7 +57,7 @@ build-docker: ## Build the docker image.
 	docker build . -t "$(DOCKER_IMAGE_NAME)" \
 	--build-arg "RUST_PROFILE=$(PROFILE)" \
 	--build-arg "RUST_FEATURES=$(FEATURES)" \
-	--build-arg "TAG_NAME=dev" \
+	--build-arg "TAG_NAME=swissledger" \
 	--build-arg "VERGEN_GIT_SHA=$(shell git rev-parse HEAD)"
 
 ##@ Test

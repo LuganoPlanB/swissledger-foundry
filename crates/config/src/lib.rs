@@ -2658,7 +2658,7 @@ impl Default for Config {
             gas_reports: vec!["*".to_string()],
             gas_reports_ignore: vec![],
             gas_reports_include_tests: false,
-            solc: None,
+            solc: Some(SolcReq::Version(Version::new(0, 8, 30))),
             vyper: Default::default(),
             auto_detect_solc: true,
             offline: false,

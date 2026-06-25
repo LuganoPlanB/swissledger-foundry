@@ -102,6 +102,98 @@ fn fix_request_packet(req: RequestPacket) -> RequestPacket {
     }
 }
 
+fn normalize_error_text(text: &str) -> Option<String> {
+    let mut value: serde_json::Value = serde_json::from_str(text).ok()?;
+    match &mut value {
+        serde_json::Value::Object(obj) => {
+            if let Some(serde_json::Value::String(msg)) = obj.get("error") {
+                obj.insert(
+                    "error".to_string(),
+                    serde_json::json!({"code": -32000, "message": msg}),
+                );
+                Some(serde_json::to_string(obj).ok()?)
+            } else {
+                None
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            let mut changed = false;
+            for item in arr.iter_mut() {
+                if let serde_json::Value::Object(obj) = item {
+                    if let Some(serde_json::Value::String(msg)) = obj.get("error") {
+                        obj.insert(
+                            "error".to_string(),
+                            serde_json::json!({"code": -32000, "message": msg}),
+                        );
+                        changed = true;
+                    }
+                }
+            }
+            if changed {
+                Some(serde_json::to_string(arr).ok()?)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+#[derive(Clone, Default)]
+pub struct NormalizeErrorLayer;
+
+impl<S> Layer<S> for NormalizeErrorLayer {
+    type Service = NormalizeErrorService<S>;
+
+    fn layer(&self, inner: S) -> Self::Service {
+        NormalizeErrorService { inner }
+    }
+}
+
+#[derive(Clone)]
+pub struct NormalizeErrorService<S> {
+    inner: S,
+}
+
+impl<S> Service<RequestPacket> for NormalizeErrorService<S>
+where
+    S: Service<
+            RequestPacket,
+            Response = ResponsePacket,
+            Error = TransportError,
+            Future = TransportFut<'static>,
+        > + Clone
+        + Send
+        + Sync
+        + 'static,
+{
+    type Response = ResponsePacket;
+    type Error = TransportError;
+    type Future = TransportFut<'static>;
+
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+
+    fn call(&mut self, req: RequestPacket) -> Self::Future {
+        let mut inner = self.inner.clone();
+        Box::pin(async move {
+            match inner.call(req).await {
+                Ok(resp) => Ok(resp),
+                Err(TransportError::DeserError { err, text }) => {
+                    if let Some(normalized) = normalize_error_text(&text) {
+                        serde_json::from_str(&normalized)
+                            .map_err(|e| TransportError::deser_err(e, normalized))
+                    } else {
+                        Err(TransportError::DeserError { err, text })
+                    }
+                }
+                Err(e) => Err(e),
+            }
+        })
+    }
+}
+
 #[derive(Clone, Default)]
 pub struct ParamsLayer;
 
@@ -462,13 +554,15 @@ impl<N: Network> ProviderBuilder<N> {
         let retry_layer =
             RetryBackoffLayer::new(max_retry, initial_backoff, compute_units_per_second);
 
+        let normalize_layer = NormalizeErrorLayer;
+
         // If curl_mode is enabled, use CurlTransport instead of RuntimeTransport
         if curl_mode {
             let transport = CurlTransport::new(url).with_headers(headers).with_jwt(jwt);
             let client = if require_params {
-                ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+                ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
             } else {
-                ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+                ClientBuilder::default().layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
             };
 
             let provider = AlloyProviderBuilder::<_, _, N>::default()
@@ -485,9 +579,9 @@ impl<N: Network> ProviderBuilder<N> {
             .no_proxy(no_proxy)
             .build();
         let client = if require_params {
-            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
         } else {
-            ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+            ClientBuilder::default().layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
         };
 
         if !is_local {
@@ -558,12 +652,13 @@ impl<N: Network> ProviderBuilder<N> {
 
         let retry_layer =
             RetryBackoffLayer::new(max_retry, initial_backoff, compute_units_per_second);
+        let normalize_layer = NormalizeErrorLayer;
         // Use normalized/parsed URLs for local detection, consistent with build()
         let is_local = parsed_urls.iter().all(|url| guess_local_url(url.as_str()));
         let client = if require_params {
-            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(round_robin, is_local)
+            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).layer(normalize_layer).transport(round_robin, is_local)
         } else {
-            ClientBuilder::default().layer(retry_layer).transport(round_robin, is_local)
+            ClientBuilder::default().layer(retry_layer).layer(normalize_layer).transport(round_robin, is_local)
         };
 
         if !is_local {
@@ -610,14 +705,15 @@ impl<N: Network> ProviderBuilder<N> {
 
         let retry_layer =
             RetryBackoffLayer::new(max_retry, initial_backoff, compute_units_per_second);
+        let normalize_layer = NormalizeErrorLayer;
 
         // If curl_mode is enabled, use CurlTransport instead of RuntimeTransport
         if curl_mode {
             let transport = CurlTransport::new(url).with_headers(headers).with_jwt(jwt);
             let client = if require_params {
-                ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+                ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
             } else {
-                ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+                ClientBuilder::default().layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
             };
 
             let provider = AlloyProviderBuilder::<_, _, N>::default()
@@ -637,9 +733,9 @@ impl<N: Network> ProviderBuilder<N> {
             .build();
 
         let client = if require_params {
-            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).transport(transport, is_local)
+            ClientBuilder::default().layer(ParamsLayer).layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
         } else {
-            ClientBuilder::default().layer(retry_layer).transport(transport, is_local)
+            ClientBuilder::default().layer(retry_layer).layer(normalize_layer).transport(transport, is_local)
         };
 
         if !is_local {
@@ -764,5 +860,38 @@ mod tests {
             _ => panic!("expected single"),
         }
         drop(rt);
+    }
+
+    #[test]
+    fn normalize_error_text_plain_string() {
+        let raw = r#"{"jsonrpc":"2.0","error":"Method, params, and jsonrpc, are all required parameters.","id":0}"#;
+        let normalized = normalize_error_text(raw).unwrap();
+        let val: serde_json::Value = serde_json::from_str(&normalized).unwrap();
+        assert_eq!(val["error"]["code"], -32000);
+        assert_eq!(val["error"]["message"], "Method, params, and jsonrpc, are all required parameters.");
+        assert_eq!(val["id"], 0);
+    }
+
+    #[test]
+    fn normalize_error_text_preserves_standard_error() {
+        let raw = r#"{"jsonrpc":"2.0","error":{"code":-32600,"message":"Invalid Request"},"id":0}"#;
+        assert!(normalize_error_text(raw).is_none());
+    }
+
+    #[test]
+    fn normalize_error_text_preserves_success() {
+        let raw = r#"{"jsonrpc":"2.0","result":"0x6e","id":0}"#;
+        assert!(normalize_error_text(raw).is_none());
+    }
+
+    #[test]
+    fn normalize_error_text_batch() {
+        let raw = r#"[{"jsonrpc":"2.0","error":"first error","id":1},{"jsonrpc":"2.0","error":"second error","id":2}]"#;
+        let normalized = normalize_error_text(raw).unwrap();
+        let val: serde_json::Value = serde_json::from_str(&normalized).unwrap();
+        assert_eq!(val[0]["error"]["code"], -32000);
+        assert_eq!(val[0]["error"]["message"], "first error");
+        assert_eq!(val[1]["error"]["code"], -32000);
+        assert_eq!(val[1]["error"]["message"], "second error");
     }
 }
