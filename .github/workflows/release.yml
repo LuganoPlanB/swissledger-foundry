@@ -39,13 +39,18 @@ jobs:
     needs: semver
     if: needs.semver.outputs.bump != 'none'
     runs-on: ubuntu-latest
+    env:
+      TARGET: x86_64-unknown-linux-musl
+      PKG_CONFIG_ALLOW_CROSS: 1
+      CC_x86_64_unknown_linux_musl: musl-gcc
+      TAG_NAME: ${{ needs.semver.outputs.version }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-unknown-linux-musl
+          targets: ${{ env.TARGET }}
 
       - name: Install musl tools
         run: sudo apt-get update && sudo apt-get install -y musl-tools
@@ -53,43 +58,53 @@ jobs:
       - name: Set up musl kernel headers
         run: |
           for dir in asm-generic drm linux mtd rdma sound video xen; do
-            sudo ln -sf /usr/include/$dir /usr/include/x86_64-linux-musl/$dir
+            sudo ln -sf /usr/include/$dir /usr/include/${{ env.TARGET }}/$dir
           done
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/${{ env.TARGET }}/dist
+          key: ${{ runner.os }}-cargo-musl-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build all static binaries
         run: |
-          export PKG_CONFIG_ALLOW_CROSS=1
-          export CC_x86_64_unknown_linux_musl=musl-gcc
-          TARGET="x86_64-unknown-linux-musl"
-          for bin in swissledger-forge swissledger-cast swissledger-anvil swissledger-chisel; do
-            echo "::group::Building $bin"
-            cargo build --profile dist --target "$TARGET" --features "asm-keccak cli" --bin "$bin"
-            echo "::endgroup::"
-          done
+          cargo build \
+            --profile dist \
+            --target "$TARGET" \
+            --features "asm-keccak cli" \
+            --locked \
+            --bin swissledger-forge \
+            --bin swissledger-cast \
+            --bin swissledger-anvil \
+            --bin swissledger-chisel
 
       - name: Upload forge
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: swissledger-forge
-          path: target/x86_64-unknown-linux-musl/dist/swissledger-forge
+          path: target/${{ env.TARGET }}/dist/swissledger-forge
 
       - name: Upload cast
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: swissledger-cast
-          path: target/x86_64-unknown-linux-musl/dist/swissledger-cast
+          path: target/${{ env.TARGET }}/dist/swissledger-cast
 
       - name: Upload anvil
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: swissledger-anvil
-          path: target/x86_64-unknown-linux-musl/dist/swissledger-anvil
+          path: target/${{ env.TARGET }}/dist/swissledger-anvil
 
       - name: Upload chisel
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: swissledger-chisel
-          path: target/x86_64-unknown-linux-musl/dist/swissledger-chisel
+          path: target/${{ env.TARGET }}/dist/swissledger-chisel
 
   release:
     needs: [semver, build]
