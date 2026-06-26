@@ -366,7 +366,7 @@ impl<N: Network> ProviderBuilder<N> {
             accept_invalid_certs: false,
             no_proxy: false,
             curl_mode: false,
-            require_params: false,
+            require_params: true,
             _network: PhantomData,
         }
     }

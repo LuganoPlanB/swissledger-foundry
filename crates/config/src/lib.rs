@@ -2712,7 +2712,7 @@ impl Default for Config {
             eth_rpc_timeout: None,
             eth_rpc_headers: None,
             eth_rpc_curl: false,
-            eth_rpc_require_params: false,
+            eth_rpc_require_params: true,
             etherscan_api_key: None,
             verbosity: 0,
             remappings: vec![],
