@@ -7,7 +7,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("cargo:rerun-if-changed=build.rs");
 
     let build = vergen::Build::builder().build_date(true).build_timestamp(true).build();
-    let git = vergen::Gitcl::builder().describe(false, true, None).sha(false).build();
+    let git = vergen::Gitcl::builder().describe(true, true, None).sha(false).build();
 
     vergen::Emitter::new().add_instructions(&build)?.add_instructions(&git)?.emit_and_set()?;
 
@@ -15,7 +15,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sha_short = &sha[..10];
 
     let tag_name = try_env_var("TAG_NAME").unwrap_or_else(|| String::from("swissledger"));
-    let version = release_version(&env_var("CARGO_PKG_VERSION"), &tag_name);
+    let describe = try_env_var("VERGEN_GIT_DESCRIBE").unwrap_or_default();
+    let version = release_version(&describe, &tag_name);
     let is_nightly = tag_name.starts_with("nightly");
 
     if is_nightly {
@@ -84,7 +85,7 @@ fn env_var(name: &str) -> String {
     try_env_var(name).unwrap()
 }
 
-fn release_version(pkg_version: &str, tag_name: &str) -> String {
+fn release_version(describe: &str, tag_name: &str) -> String {
     if let Some(version) = tag_name.strip_prefix('v') {
         return version.to_owned();
     }
@@ -94,7 +95,16 @@ fn release_version(pkg_version: &str, tag_name: &str) -> String {
     // already included in the SemVer build metadata (after `+`).
     let normalized = if tag_name.starts_with("nightly-") { "nightly" } else { tag_name };
 
-    format!("{pkg_version}-{normalized}")
+    // Extract base version from `git describe --tags`, which produces e.g.
+    // `v1.8.0` at a tag or `v1.8.0-3-gabcdef` 3 commits after.  Fall back to
+    // CARGO_PKG_VERSION when describe is unavailable (shallow clone / no tags).
+    let base_version = describe
+        .strip_prefix('v')
+        .and_then(|s| s.split('-').next())
+        .map(|s| s.to_owned())
+        .unwrap_or_else(|| env_var("CARGO_PKG_VERSION"));
+
+    format!("{base_version}-{normalized}")
 }
 
 fn try_env_var(name: &str) -> Option<String> {
