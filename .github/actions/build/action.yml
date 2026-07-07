@@ -19,6 +19,13 @@ runs:
       if: runner.os == 'Linux'
       uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
+    - name: Install sold linker (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install bluewhalesystems/sold/sold
+        echo 'RUSTFLAGS=-C link-arg=-fuse-ld=sold' >> "$GITHUB_ENV"
+
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
 
