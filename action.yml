@@ -29,7 +29,7 @@ runs:
         echo "suffix=${os}-${arch}" >> "$GITHUB_OUTPUT"
 
     - name: Download swissledger-foundry binaries
-      uses: robinraju/release-downloader@5e8837db45f5e959c97297795833a1708b362a66 # v1.12
+      uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # v1.13
       with:
         repository: LuganoPlanB/swissledger-foundry
         token: ${{ inputs.token }}
