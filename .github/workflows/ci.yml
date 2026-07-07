@@ -64,6 +64,7 @@ jobs:
           $CAST send "$ADDR" --value 0 \
             --rpc-url "$RPC_URL" --private-key "$PRIVATE_KEY" \
             --legacy --gas-price 0 --chain "$CHAIN_ID" \
+            --gas-limit 21000 \
             > /dev/null
           echo "  PASS: tx confirmed"
 
@@ -74,6 +75,7 @@ jobs:
           DEPLOY=$($FORGE create .github/smoke/Counter.sol:Counter \
             --rpc-url "$RPC_URL" --private-key "$PRIVATE_KEY" \
             --legacy --gas-price 0 --chain "$CHAIN_ID" \
+            --gas-limit 200000 \
             --broadcast --json)
           COUNTER=$(echo "$DEPLOY" | jq -r .deployedTo)
           echo "  deployed: $COUNTER"
@@ -90,6 +92,7 @@ jobs:
           $CAST send "$COUNTER" "increment()" \
             --rpc-url "$RPC_URL" --private-key "$PRIVATE_KEY" \
             --legacy --gas-price 0 --chain "$CHAIN_ID" \
+            --gas-limit 100000 \
             > /dev/null
           echo "  TX confirmed"
 
