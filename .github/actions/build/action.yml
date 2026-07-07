@@ -72,7 +72,7 @@ runs:
       env:
         SCCACHE_GHA_ENABLED: 'true'
         RUSTC_WRAPPER: sccache
-        CARGO_INCREMENTAL: 1
+        CARGO_INCREMENTAL: 0
 
     - name: Save cargo caches
       if: always()
