@@ -18,7 +18,7 @@ jobs:
 
       - name: Smoke test (on-chain)
         env:
-          RPC_URL: ${{ secrets.SWISSLEDGER_TESTNET_ADDRESS }}
+          RPC_URL: ${{ vars.SWISSLEDGER_TESTNET_RPC }}
           PRIVATE_KEY: ${{ secrets.SWISSLEDGER_TESTNET_DEPLOY }}
           CHAIN_ID: 222
         run: |
@@ -31,7 +31,7 @@ jobs:
             echo ""
             echo "╔══════════════════════════════════════════════════════════════╗"
             echo "║  WARNING: on-chain smoke test SKIPPED                       ║"
-            echo "║  Testnet secrets not available (PR from fork?)              ║"
+            echo "║  RPC_URL or PRIVATE_KEY not available.                      ║"
             echo "║  No chain compatibility validation was performed.           ║"
             echo "╚══════════════════════════════════════════════════════════════╝"
             echo ""
