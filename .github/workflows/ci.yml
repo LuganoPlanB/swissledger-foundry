@@ -17,6 +17,7 @@ jobs:
       - uses: ./.github/actions/build
 
       - name: Smoke test (on-chain)
+        if: ${{ github.event_name == 'workflow_dispatch' || !contains(github.event.pull_request.labels.*.name, 'skip-smoke') }}
         env:
           RPC_URL: ${{ vars.SWISSLEDGER_TESTNET_RPC }}
           PRIVATE_KEY: ${{ secrets.SWISSLEDGER_TESTNET_DEPLOY }}
