@@ -28,7 +28,13 @@ jobs:
           CAST=./target/debug/swissledger-cast
 
           if [ -z "${RPC_URL:-}" ] || [ -z "${PRIVATE_KEY:-}" ]; then
-            echo "SKIP: testnet secrets not configured"
+            echo ""
+            echo "╔══════════════════════════════════════════════════════════════╗"
+            echo "║  WARNING: on-chain smoke test SKIPPED                       ║"
+            echo "║  Testnet secrets not available (PR from fork?)              ║"
+            echo "║  No chain compatibility validation was performed.           ║"
+            echo "╚══════════════════════════════════════════════════════════════╝"
+            echo ""
             exit 0
           fi
 
