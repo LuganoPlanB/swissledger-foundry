@@ -5,12 +5,18 @@ inputs:
   version:
     description: Release version tag, or "latest" (default) for the most recent release
     default: latest
+  token:
+    description: GitHub token for release downloads
+    default: ${{ github.token }}
 
 runs:
   using: composite
   steps:
     - name: Install swissledger-foundry
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
 
@@ -27,20 +33,18 @@ runs:
         esac
         suffix="${os}-${arch}"
 
-        # Resolve download URL
-        if [ "${{ inputs.version }}" = "latest" ]; then
-          base="https://github.com/LuganoPlanB/swissledger-foundry/releases/latest/download"
-        else
-          base="https://github.com/LuganoPlanB/swissledger-foundry/releases/download/${{ inputs.version }}"
-        fi
-
         bindir="$HOME/.local/bin"
         mkdir -p "$bindir"
 
         for tool in forge cast anvil chisel; do
-          url="${base}/swissledger-${tool}_${suffix}"
-          echo "downloading $url"
-          curl -fsSL --retry 3 "$url" -o "$bindir/swissledger-$tool"
+          pattern="swissledger-${tool}_${suffix}"
+          echo "downloading $pattern"
+          gh release download "$VERSION" \
+            --repo LuganoPlanB/swissledger-foundry \
+            --pattern "$pattern" \
+            --dir "$bindir" \
+            --clobber
+          mv "$bindir/$pattern" "$bindir/swissledger-$tool"
           chmod +x "$bindir/swissledger-$tool"
         done
 
