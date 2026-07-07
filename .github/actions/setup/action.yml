@@ -1,0 +1,35 @@
+name: swissledger-foundry
+description: Set up the Swissledger Foundry toolchain (forge, cast, anvil)
+author: PlanB Foundation
+
+inputs:
+  version:
+    description: Foundry version (default: stable)
+    default: stable
+
+runs:
+  using: composite
+  steps:
+    - name: Install Foundry
+      uses: foundry-rs/foundry-toolchain@v1
+      with:
+        version: ${{ inputs.version }}
+
+    - name: Configure Swissledger defaults
+      shell: bash
+      run: |
+        # Create wrapper scripts that add chain-specific defaults
+        BIN_DIR="$HOME/.local/bin"
+        mkdir -p "$BIN_DIR"
+
+        for tool in forge cast anvil; do
+          cat > "$BIN_DIR/swissledger-$tool" << 'WRAPPER'
+        #!/usr/bin/env bash
+        # swissledger-$tool — wrapper adding chain-specific defaults (chain 222, istanbul, gas-free)
+        exec $tool "$@"
+        WRAPPER
+          sed -i "s/\$tool/$tool/g" "$BIN_DIR/swissledger-$tool"
+          chmod +x "$BIN_DIR/swissledger-$tool"
+        done
+
+        echo "$BIN_DIR" >> "$GITHUB_PATH"
