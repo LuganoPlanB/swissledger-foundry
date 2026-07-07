@@ -15,3 +15,84 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - uses: ./.github/actions/build
+
+      - name: Smoke test (on-chain)
+        env:
+          RPC_URL: ${{ secrets.SWISSLEDGER_TESTNET_ADDRESS }}
+          PRIVATE_KEY: ${{ secrets.SWISSLEDGER_TESTNET_DEPLOY }}
+          CHAIN_ID: 222
+        run: |
+          set -euo pipefail
+
+          FORGE=./target/debug/swissledger-forge
+          CAST=./target/debug/swissledger-cast
+
+          if [ -z "${RPC_URL:-}" ] || [ -z "${PRIVATE_KEY:-}" ]; then
+            echo "SKIP: testnet secrets not configured"
+            exit 0
+          fi
+
+          echo "=== A. Connectivity ==="
+
+          echo -n "block-number: "
+          $CAST block-number --rpc-url "$RPC_URL"
+
+          echo -n "chain-id:     "
+          CHAIN=$($CAST chain-id --rpc-url "$RPC_URL")
+          echo "$CHAIN"
+          if [ "$CHAIN" != "$CHAIN_ID" ]; then
+            echo "FAIL: expected chain $CHAIN_ID, got $CHAIN"
+            exit 1
+          fi
+          echo "  PASS: chain-id matches"
+
+          ADDR=$($CAST wallet address --private-key "$PRIVATE_KEY")
+          echo -n "balance:      "
+          $CAST balance --rpc-url "$RPC_URL" "$ADDR" || echo "0 (ok)"
+
+          echo ""
+          echo "=== B. Minimal transaction ==="
+
+          echo "sending zero-value transfer to self..."
+          $CAST send "$ADDR" --value 0 \
+            --rpc-url "$RPC_URL" --private-key "$PRIVATE_KEY" \
+            --legacy --gas-price 0 --chain "$CHAIN_ID" \
+            > /dev/null
+          echo "  PASS: tx confirmed"
+
+          echo ""
+          echo "=== C. Deploy + interact ==="
+
+          echo "deploying Counter..."
+          DEPLOY=$($FORGE create .github/smoke/Counter.sol:Counter \
+            --rpc-url "$RPC_URL" --private-key "$PRIVATE_KEY" \
+            --legacy --gas-price 0 --chain "$CHAIN_ID" \
+            --broadcast --json)
+          COUNTER=$(echo "$DEPLOY" | jq -r .deployedTo)
+          echo "  deployed: $COUNTER"
+
+          echo -n "count() == 0? "
+          VAL=$($CAST call "$COUNTER" "count()(uint256)" --rpc-url "$RPC_URL")
+          if [ "$VAL" != "0" ]; then
+            echo "FAIL: expected 0, got $VAL"
+            exit 1
+          fi
+          echo "  PASS"
+
+          echo "calling increment()..."
+          $CAST send "$COUNTER" "increment()" \
+            --rpc-url "$RPC_URL" --private-key "$PRIVATE_KEY" \
+            --legacy --gas-price 0 --chain "$CHAIN_ID" \
+            > /dev/null
+          echo "  TX confirmed"
+
+          echo -n "count() == 1? "
+          VAL=$($CAST call "$COUNTER" "count()(uint256)" --rpc-url "$RPC_URL")
+          if [ "$VAL" != "1" ]; then
+            echo "FAIL: expected 1, got $VAL"
+            exit 1
+          fi
+          echo "  PASS"
+
+          echo ""
+          echo "=== PASS: on-chain smoke test ==="
