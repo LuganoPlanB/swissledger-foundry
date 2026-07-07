@@ -75,13 +75,6 @@ jobs:
         with:
           target_arch: x86_64
 
-      - name: Install lld linker (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install llvm
-          echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
-          echo 'RUSTFLAGS=-C link-arg=-fuse-ld=lld' >> "$GITHUB_ENV"
-
       - name: Cache cargo
         uses: actions/cache@v6
         with:
@@ -99,6 +92,9 @@ jobs:
           if [ "${{ matrix.setup_musl }}" = "true" ]; then
             export PKG_CONFIG_ALLOW_CROSS=1
             export CC_x86_64_unknown_linux_musl="${{ steps.musl.outputs.CC }}"
+          fi
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            export CARGO_PROFILE_DIST_LTO=thin
           fi
           cargo build \
             --profile dist \
