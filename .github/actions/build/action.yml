@@ -15,11 +15,25 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install mold linker (Linux)
+    - name: Download mold (Linux)
       if: runner.os == 'Linux'
-      uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+      uses: robinraju/release-downloader@5e8837db45f5e959c97297795833a1708b362a66 # v1.12
       with:
-        mold-version: latest
+        repository: rui314/mold
+        latest: true
+        fileName: 'mold-*-x86_64-linux.tar.gz'
+        out-file-path: ${{ runner.temp }}/mold
+
+    - name: Install mold (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        cd "${{ runner.temp }}/mold"
+        tar xzf mold-*.tar.gz
+        mkdir -p "${{ runner.temp }}/mold-bin"
+        cp mold-*/bin/mold "${{ runner.temp }}/mold-bin/"
+        echo "${{ runner.temp }}/mold-bin" >> "$GITHUB_PATH"
+        echo 'RUSTFLAGS=-C link-arg=-fuse-ld=mold' >> "$GITHUB_ENV"
 
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10

@@ -12,40 +12,45 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install swissledger-foundry
+    - name: Resolve platform suffix
+      id: platform
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        VERSION: ${{ inputs.version }}
       run: |
-        set -euo pipefail
-
-        # Map runner to release asset suffix
         case "$RUNNER_OS" in
-          Linux)   os=linux ;;
-          macOS)   os=darwin ;;
-          *)       echo "unsupported runner OS: $RUNNER_OS"; exit 1 ;;
+          Linux) os=linux ;;
+          macOS) os=darwin ;;
+          *)     echo "unsupported runner OS: $RUNNER_OS"; exit 1 ;;
         esac
         case "$RUNNER_ARCH" in
           X64)   arch=x86_64 ;;
           ARM64) arch=arm64 ;;
           *)     echo "unsupported runner arch: $RUNNER_ARCH"; exit 1 ;;
         esac
-        suffix="${os}-${arch}"
+        echo "suffix=${os}-${arch}" >> "$GITHUB_OUTPUT"
 
+    - name: Download swissledger-foundry binaries
+      uses: robinraju/release-downloader@5e8837db45f5e959c97297795833a1708b362a66 # v1.12
+      with:
+        repository: LuganoPlanB/swissledger-foundry
+        token: ${{ inputs.token }}
+        latest: ${{ inputs.version == 'latest' }}
+        tag: ${{ inputs.version != 'latest' && inputs.version || '' }}
+        fileName: "swissledger-*_${{ steps.platform.outputs.suffix }}"
+        out-file-path: .swissledger-tmp
+
+    - name: Install binaries
+      shell: bash
+      run: |
         bindir="$HOME/.local/bin"
         mkdir -p "$bindir"
 
-        for tool in forge cast anvil chisel; do
-          pattern="swissledger-${tool}_${suffix}"
-          echo "downloading $pattern"
-          gh release download "$VERSION" \
-            --repo LuganoPlanB/swissledger-foundry \
-            --pattern "$pattern" \
-            --dir "$bindir" \
-            --clobber
-          mv "$bindir/$pattern" "$bindir/swissledger-$tool"
-          chmod +x "$bindir/swissledger-$tool"
+        suffix="${{ steps.platform.outputs.suffix }}"
+        for bin in .swissledger-tmp/swissledger-*_"$suffix"; do
+          name="${bin##*/}"          # swissledger-forge_linux-x86_64
+          name="${name%_${suffix}}"  # swissledger-forge
+          mv "$bin" "$bindir/$name"
+          chmod +x "$bindir/$name"
         done
 
+        rm -rf .swissledger-tmp
         echo "$bindir" >> "$GITHUB_PATH"
