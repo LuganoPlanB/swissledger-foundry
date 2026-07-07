@@ -48,15 +48,16 @@ runs:
         fi
 
         cargo build \
-          --workspace \
           --locked \
+          --bin swissledger-forge \
+          --bin swissledger-cast \
+          --bin swissledger-anvil \
           $PROFILE_FLAG \
           $FEATURES_FLAG \
           ${{ inputs.args }}
       env:
         SCCACHE_GHA_ENABLED: 'true'
         RUSTC_WRAPPER: sccache
-        CARGO_INCREMENTAL: 0
 
     - name: Save cargo caches
       if: always()
