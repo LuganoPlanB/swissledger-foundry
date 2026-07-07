@@ -17,26 +17,16 @@ runs:
   steps:
     - name: Install mold linker (Linux)
       if: runner.os == 'Linux'
-      uses: rui314/setup-mold@0981d9c8bf6256c2b9c30262569526a62ab0db84 # v1
-      with:
-        mold-version: latest
-
-    - name: Install lld linker (macOS)
-      if: runner.os == 'macOS'
-      shell: bash
-      run: |
-        brew install llvm
-        echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
-        echo 'RUSTFLAGS=-C link-arg=-fuse-ld=lld' >> "$GITHUB_ENV"
+      uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
     - name: Setup sccache
-      uses: mozilla-actions/sccache-action@8e44775030a859ac7221b9ddf76e7cef1a80a0d6 # v0.0.9
+      uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
 
     - name: Install Rust toolchain (stable)
       uses: dtolnay/rust-toolchain@stable
 
     - name: Restore cargo caches
-      uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.3.0
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -58,19 +48,20 @@ runs:
         fi
 
         cargo build \
-          --workspace \
           --locked \
+          --bin swissledger-forge \
+          --bin swissledger-cast \
+          --bin swissledger-anvil \
           $PROFILE_FLAG \
           $FEATURES_FLAG \
           ${{ inputs.args }}
       env:
         SCCACHE_GHA_ENABLED: 'true'
         RUSTC_WRAPPER: sccache
-        CARGO_INCREMENTAL: 1
 
     - name: Save cargo caches
       if: always()
-      uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.3.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry

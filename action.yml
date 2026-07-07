@@ -5,43 +5,52 @@ inputs:
   version:
     description: Release version tag, or "latest" (default) for the most recent release
     default: latest
+  token:
+    description: GitHub token for release downloads
+    default: ${{ github.token }}
 
 runs:
   using: composite
   steps:
-    - name: Install swissledger-foundry
+    - name: Resolve platform suffix
+      id: platform
       shell: bash
       run: |
-        set -euo pipefail
-
-        # Map runner to release asset suffix
         case "$RUNNER_OS" in
-          Linux)   os=linux ;;
-          macOS)   os=darwin ;;
-          *)       echo "unsupported runner OS: $RUNNER_OS"; exit 1 ;;
+          Linux) os=linux ;;
+          macOS) os=darwin ;;
+          *)     echo "unsupported runner OS: $RUNNER_OS"; exit 1 ;;
         esac
         case "$RUNNER_ARCH" in
           X64)   arch=x86_64 ;;
           ARM64) arch=arm64 ;;
           *)     echo "unsupported runner arch: $RUNNER_ARCH"; exit 1 ;;
         esac
-        suffix="${os}-${arch}"
+        echo "suffix=${os}-${arch}" >> "$GITHUB_OUTPUT"
 
-        # Resolve download URL
-        if [ "${{ inputs.version }}" = "latest" ]; then
-          base="https://github.com/LuganoPlanB/swissledger-foundry/releases/latest/download"
-        else
-          base="https://github.com/LuganoPlanB/swissledger-foundry/releases/download/${{ inputs.version }}"
-        fi
+    - name: Download swissledger-foundry binaries
+      uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # v1.13
+      with:
+        repository: LuganoPlanB/swissledger-foundry
+        token: ${{ inputs.token }}
+        latest: ${{ inputs.version == 'latest' }}
+        tag: ${{ inputs.version != 'latest' && inputs.version || '' }}
+        fileName: "swissledger-*_${{ steps.platform.outputs.suffix }}"
+        out-file-path: .swissledger-tmp
 
+    - name: Install binaries
+      shell: bash
+      run: |
         bindir="$HOME/.local/bin"
         mkdir -p "$bindir"
 
-        for tool in forge cast anvil chisel; do
-          url="${base}/swissledger-${tool}_${suffix}"
-          echo "downloading $url"
-          curl -fsSL --retry 3 "$url" -o "$bindir/swissledger-$tool"
-          chmod +x "$bindir/swissledger-$tool"
+        suffix="${{ steps.platform.outputs.suffix }}"
+        for bin in .swissledger-tmp/swissledger-*_"$suffix"; do
+          name="${bin##*/}"          # swissledger-forge_linux-x86_64
+          name="${name%_${suffix}}"  # swissledger-forge
+          mv "$bin" "$bindir/$name"
+          chmod +x "$bindir/$name"
         done
 
+        rm -rf .swissledger-tmp
         echo "$bindir" >> "$GITHUB_PATH"
