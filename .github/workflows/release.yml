@@ -53,11 +53,7 @@ jobs:
             suffix: darwin-arm64
             features: "cli"
             setup_musl: false
-          - os: macos-13
-            target: x86_64-apple-darwin
-            suffix: darwin-x86_64
-            features: "cli"
-            setup_musl: false
+
     env:
       TAG_NAME: ${{ needs.semver.outputs.version }}
     steps:
