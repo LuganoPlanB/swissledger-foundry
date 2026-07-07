@@ -1,0 +1,69 @@
+name: Build swissledger-foundry
+description: Optimized Rust workspace build with sccache, mold linker, and smart caching
+
+inputs:
+  features:
+    description: Cargo features to enable (comma-separated)
+    default: ''
+  profile:
+    description: Build profile (dev, release, dist, profiling)
+    default: dev
+  args:
+    description: Additional cargo build arguments
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Install mold linker
+      uses: rui314/setup-mold@0981d9c8bf6256c2b9c30262569526a62ab0db84 # v1
+      with:
+        mold-version: latest
+
+    - name: Setup sccache
+      uses: mozilla-actions/sccache-action@8e44775030a859ac7221b9ddf76e7cef1a80a0d6 # v0.0.9
+
+    - name: Install Rust toolchain (stable)
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Restore cargo caches
+      uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.3.0
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Build workspace
+      shell: bash
+      run: |
+        PROFILE_FLAG=""
+        FEATURES_FLAG=""
+        if [ -n "${{ inputs.profile }}" ] && [ "${{ inputs.profile }}" != "dev" ]; then
+          PROFILE_FLAG="--profile ${{ inputs.profile }}"
+        fi
+        if [ -n "${{ inputs.features }}" ]; then
+          FEATURES_FLAG="--features ${{ inputs.features }}"
+        fi
+
+        cargo build \
+          --workspace \
+          --locked \
+          $PROFILE_FLAG \
+          $FEATURES_FLAG \
+          ${{ inputs.args }}
+      env:
+        SCCACHE_GHA_ENABLED: 'true'
+        RUSTC_WRAPPER: sccache
+        CARGO_INCREMENTAL: 1
+
+    - name: Save cargo caches
+      if: always()
+      uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.3.0
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
