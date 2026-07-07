@@ -730,7 +730,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-serde 2.1.0",
  "alloy-sol-types",
- "itertools 0.14.0",
+ "itertools 0.13.0",
  "serde",
  "serde_json",
  "serde_with",
@@ -1016,7 +1016,7 @@ checksum = "ee68bc7d713e033eeaaecb8fd13d5d8a41af97226c4388930ad459285b8e9f70"
 dependencies = [
  "alloy-json-rpc",
  "alloy-transport",
- "itertools 0.14.0",
+ "itertools 0.13.0",
  "reqwest 0.13.4",
  "serde_json",
  "tower",
@@ -1264,7 +1264,7 @@ dependencies = [
  "foundry-test-utils",
  "futures",
  "hyper",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "op-alloy-consensus",
  "op-alloy-rpc-types",
  "op-revm",
@@ -2611,7 +2611,7 @@ version = "3.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dee98b0db6a962de883bf5d20362dee4d7ca0d12fe39a7c6c73c844e1cd7c1f"
 dependencies = [
- "darling 0.20.11",
+ "darling 0.23.0",
  "ident_case",
  "prettyplease",
  "proc-macro2",
@@ -2827,7 +2827,7 @@ dependencies = [
  "foundry-test-utils",
  "foundry-wallets",
  "futures",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "op-alloy-consensus",
  "op-alloy-flz",
  "op-alloy-network",
@@ -2925,7 +2925,7 @@ dependencies = [
  "foundry-evm",
  "foundry-solang-parser",
  "foundry-test-utils",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "reqwest 0.13.4",
  "rexpect",
  "rustyline",
@@ -3073,7 +3073,7 @@ dependencies = [
  "terminfo",
  "thiserror 2.0.18",
  "which",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3226,7 +3226,7 @@ version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "faf9468729b8cbcea668e36183cb69d317348c2e08e994829fb56ebfdfbaac34"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4087,7 +4087,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4392,7 +4392,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4728,7 +4728,7 @@ dependencies = [
  "globset",
  "indicatif",
  "inferno",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "mockall",
  "opener",
  "parking_lot",
@@ -4776,7 +4776,7 @@ dependencies = [
  "foundry-compilers",
  "foundry-config",
  "foundry-solang-parser",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "mdbook-driver",
  "rayon",
  "regex",
@@ -4795,7 +4795,7 @@ dependencies = [
  "foundry-common",
  "foundry-config",
  "foundry-test-utils",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "similar 2.7.0",
  "snapbox",
  "solar-compiler",
@@ -4849,7 +4849,7 @@ dependencies = [
  "foundry-wallets",
  "futures",
  "indicatif",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "parking_lot",
  "revm-inspectors",
  "semver 1.0.28",
@@ -4918,7 +4918,7 @@ dependencies = [
  "foundry-evm-networks",
  "foundry-test-utils",
  "futures",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "regex",
  "reqwest 0.13.4",
  "revm",
@@ -4992,7 +4992,7 @@ dependencies = [
  "foundry-evm-fuzz",
  "foundry-evm-traces",
  "foundry-wallets",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "jsonpath_lib",
  "k256",
  "memchr",
@@ -5054,7 +5054,7 @@ dependencies = [
  "foundry-wallets",
  "futures",
  "indicatif",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "mimalloc",
  "path-slash",
  "rayon",
@@ -5124,7 +5124,7 @@ dependencies = [
  "foundry-config",
  "foundry-wallets",
  "futures",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "jiff",
  "num-format",
  "op-alloy-network",
@@ -5191,7 +5191,7 @@ dependencies = [
  "foundry-compilers-artifacts",
  "foundry-compilers-core",
  "fs_extra",
- "itertools 0.14.0",
+ "itertools 0.13.0",
  "path-slash",
  "rand 0.9.4",
  "rayon",
@@ -5294,7 +5294,7 @@ dependencies = [
  "glob",
  "globset",
  "heck",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "mesc",
  "path-slash",
  "rayon",
@@ -5380,7 +5380,7 @@ dependencies = [
  "derive_more",
  "foundry-common-fmt",
  "foundry-macros",
- "itertools 0.14.0",
+ "itertools 0.15.0",
 ]
 
 [[package]]
@@ -5414,7 +5414,7 @@ dependencies = [
  "foundry-fork-db",
  "foundry-test-utils",
  "futures",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "op-alloy-consensus",
  "op-alloy-network",
  "op-alloy-rpc-types",
@@ -5465,7 +5465,7 @@ dependencies = [
  "foundry-evm-core",
  "foundry-evm-coverage",
  "foundry-evm-traces",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "parking_lot",
  "proptest",
  "rand 0.9.4",
@@ -5528,7 +5528,7 @@ dependencies = [
  "foundry-evm-core",
  "foundry-linking",
  "futures",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "memchr",
  "rayon",
  "reqwest 0.13.4",
@@ -6650,7 +6650,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
 dependencies = [
  "hermit-abi",
  "libc",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -6691,6 +6691,15 @@ name = "itertools"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b4baf93f58d4425749ca49a51c50ebab072c5df6994d08fed93541c331481dc"
 dependencies = [
  "either",
 ]
@@ -7533,7 +7542,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -8530,7 +8539,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b570b25f7617e43d59005d0990ccb79e950a423952cea19671b7a876da390adf"
 dependencies = [
  "anyhow",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "proc-macro2",
  "quote",
  "syn 2.0.118",
@@ -8699,7 +8708,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.59.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -9916,7 +9925,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -9975,7 +9984,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -10768,7 +10777,7 @@ dependencies = [
  "derive_more",
  "dunce",
  "inturn",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "itoa",
  "normalize-path",
  "once_map",
@@ -10803,7 +10812,7 @@ dependencies = [
  "alloy-primitives",
  "bitflags 2.13.0",
  "bumpalo",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "memchr",
  "num-bigint",
  "num-rational",
@@ -11257,7 +11266,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -11469,7 +11478,7 @@ version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8c27177b12a6399ffc08b98f76f7c9a1f4fe9fc967c784c5a071fa8d93cf7e1"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -11479,7 +11488,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "230a1b821ccbd75b185820a1f1ff7b14d21da1e442e22c0863ea5f08771a8874"
 dependencies = [
  "rustix",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -12668,7 +12677,7 @@ dependencies = [
  "watchexec-events",
  "watchexec-signals",
  "watchexec-supervisor",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -12802,7 +12811,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
