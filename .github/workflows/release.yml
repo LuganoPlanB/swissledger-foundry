@@ -75,6 +75,13 @@ jobs:
         with:
           target_arch: x86_64
 
+      - name: Install lld linker (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm
+          echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
+          echo 'RUSTFLAGS=-C link-arg=-fuse-ld=lld' >> "$GITHUB_ENV"
+
       - name: Cache cargo
         uses: actions/cache@v6
         with:

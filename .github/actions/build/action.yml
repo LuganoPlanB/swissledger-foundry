@@ -15,10 +15,19 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install mold linker
+    - name: Install mold linker (Linux)
+      if: runner.os == 'Linux'
       uses: rui314/setup-mold@0981d9c8bf6256c2b9c30262569526a62ab0db84 # v1
       with:
         mold-version: latest
+
+    - name: Install lld linker (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install llvm
+        echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
+        echo 'RUSTFLAGS=-C link-arg=-fuse-ld=lld' >> "$GITHUB_ENV"
 
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@8e44775030a859ac7221b9ddf76e7cef1a80a0d6 # v0.0.9
