@@ -3,6 +3,44 @@
 Fork of [Foundry](https://github.com/foundry-rs/foundry) **1.7.1** adapted for the
 [SwissLedger](https://ledger.swiss) blockchain (chain id 110).
 
+## Install
+
+**Pipe to bash** (Linux & macOS):
+
+```bash
+curl -fsSL https://plan-b.foundation/swissledger-foundry/install.sh | bash
+```
+
+Pins a specific version:
+
+```bash
+curl -fsSL https://plan-b.foundation/swissledger-foundry/install.sh | bash -s v1.9.10
+```
+
+## GitHub Action
+
+```yaml
+- uses: LuganoPlanB/swissledger-foundry@main
+```
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `version` | `latest` | Release tag to install |
+| `token` | `${{ github.token }}` | GitHub token for authenticated downloads |
+
+Full example:
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: LuganoPlanB/swissledger-foundry@main
+      - run: swissledger-forge build
+      - run: swissledger-forge test
+```
+
 <div align="center">
   <img src=".github/assets/banner.png" alt="Foundry banner" />
 
