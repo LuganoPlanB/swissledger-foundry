@@ -113,6 +113,10 @@ fi
 
 # --- PATH ---
 if [ "$GHA_MODE" -eq 1 ]; then
+  # Create unprefixed aliases (forge, cast, anvil, chisel) for Makefiles/scripts
+  for tool in "${TOOLS[@]}"; do
+    ln -sf "${INSTALL_DIR}/swissledger-${tool}" "${INSTALL_DIR}/${tool}"
+  done
   echo "$INSTALL_DIR" >> "$GITHUB_PATH"
 else
   if ! echo "$PATH" | tr ':' '\n' | grep -qxF "$INSTALL_DIR"; then
