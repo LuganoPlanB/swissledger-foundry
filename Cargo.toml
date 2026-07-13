@@ -418,7 +418,7 @@ commonware-cryptography = "2026.5.0"
 
 # revm
 revm = { version = "38.0.0", default-features = false }
-revm-inspectors = { version = "0.39.0", features = ["serde"] }
+revm-inspectors = { version = "0.41.2", features = ["serde"] }
 op-revm = { version = "19.0.0", default-features = false }
 
 ## cli
