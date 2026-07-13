@@ -490,7 +490,7 @@ tempfile = "3.27"
 tokio = "1"
 tokio-tungstenite = { version = "0.28", features = ["rustls-tls-webpki-roots"] }
 toml = "1.1"
-toml_edit = "0.24"
+toml_edit = "0.25"
 tower = "0.5"
 tower-http = "0.6"
 tracing = "0.1"
